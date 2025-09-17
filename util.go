@@ -34,19 +34,7 @@ func getConfiguredDirectory(cmd *cli.Command) identity.Directory {
 	return baseDir
 }
 
-func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
-	// This function is kept for backward compatibility but should be replaced
-	// with resolveIdentCmd where possible
-	id, err := syntax.ParseAtIdentifier(arg)
-	if err != nil {
-		return nil, err
-	}
-
-	dir := identity.DefaultDirectory()
-	return dir.Lookup(ctx, *id)
-}
-
-func resolveIdentCmd(ctx context.Context, cmd *cli.Command, arg string) (*identity.Identity, error) {
+func resolveIdent(ctx context.Context, cmd *cli.Command, arg string) (*identity.Identity, error) {
 	id, err := syntax.ParseAtIdentifier(arg)
 	if err != nil {
 		return nil, err

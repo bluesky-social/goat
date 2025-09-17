@@ -144,7 +144,7 @@ func runRecordList(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
