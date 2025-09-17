@@ -100,6 +100,10 @@ func refreshAuthSession(ctx context.Context, username syntax.AtIdentifier, passw
 
 	var did syntax.DID
 	if pdsURL == "" {
+		// Use default directory for auth refresh
+		// Note: This uses DefaultDirectory() since it's called from loadAuthClient
+		// which doesn't have access to cmd context. The PDS URL can be overridden
+		// via the pdsURL parameter which comes from login command or saved session.
 		dir := identity.DefaultDirectory()
 		ident, err := dir.Lookup(ctx, username)
 		if err != nil {

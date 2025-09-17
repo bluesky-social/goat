@@ -9,7 +9,6 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/data"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/xrpc"
 
@@ -110,7 +109,7 @@ var cmdRecordList = &cli.Command{
 }
 
 func runRecordGet(ctx context.Context, cmd *cli.Command) error {
-	dir := identity.DefaultDirectory()
+	dir := getConfiguredDirectory(cmd)
 
 	uriArg := cmd.Args().First()
 	if uriArg == "" {
