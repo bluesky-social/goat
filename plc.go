@@ -23,14 +23,7 @@ import (
 var cmdPLC = &cli.Command{
 	Name:  "plc",
 	Usage: "commands for PLC identities (DIDs) and directory interactions (see also 'account plc')",
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "plc-host",
-			Usage:   "method, hostname, and port of PLC registry",
-			Value:   "https://plc.directory",
-			Sources: cli.EnvVars("ATP_PLC_HOST"),
-		},
-	},
+	Flags: []cli.Flag{},
 	Commands: []*cli.Command{
 		&cli.Command{
 			Name:      "history",
@@ -170,7 +163,10 @@ var cmdPLC = &cli.Command{
 }
 
 func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
-	plcHost := cmd.String("plc-host")
+	plcHost := cmd.String("plc-url")
+	if plcHost == "" {
+		plcHost = "https://plc.directory"
+	}
 	s := cmd.Args().First()
 	if s == "" {
 		return fmt.Errorf("need to provide account identifier as an argument")
@@ -238,7 +234,10 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 }
 
 func runPLCData(ctx context.Context, cmd *cli.Command) error {
-	plcHost := cmd.String("plc-host")
+	plcHost := cmd.String("plc-url")
+	if plcHost == "" {
+		plcHost = "https://plc.directory"
+	}
 	s := cmd.Args().First()
 	if s == "" {
 		return fmt.Errorf("need to provide account identifier as an argument")
@@ -287,7 +286,10 @@ func runPLCData(ctx context.Context, cmd *cli.Command) error {
 }
 
 func runPLCDump(ctx context.Context, cmd *cli.Command) error {
-	plcHost := cmd.String("plc-host")
+	plcHost := cmd.String("plc-url")
+	if plcHost == "" {
+		plcHost = "https://plc.directory"
+	}
 	client := util.RobustHTTPClient()
 	size := cmd.Int("batch-size")
 	tailMode := cmd.Bool("tail")
@@ -606,8 +608,12 @@ func runPLCSubmit(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("operation must be signed")
 	}
 
+	plcHost := cmd.String("plc-url")
+	if plcHost == "" {
+		plcHost = "https://plc.directory"
+	}
 	c := didplc.Client{
-		DirectoryURL: cmd.String("plc-host"),
+		DirectoryURL: plcHost,
 		UserAgent:    *userAgent(),
 	}
 
@@ -673,8 +679,12 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("please specify a DID to update")
 	}
 
+	plcHost := cmd.String("plc-url")
+	if plcHost == "" {
+		plcHost = "https://plc.directory"
+	}
 	c := didplc.Client{
-		DirectoryURL: cmd.String("plc-host"),
+		DirectoryURL: plcHost,
 		UserAgent:    *userAgent(),
 	}
 	op, err := fetchOpForUpdate(ctx, c, didString, prevCID)
