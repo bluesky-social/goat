@@ -7,8 +7,8 @@ import (
 	"sort"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/client"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/urfave/cli/v3"
 )
@@ -124,17 +124,15 @@ func runRelayAccountList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := xrpc.Client{
-		Host:      cmd.String("relay-host"),
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(cmd.String("relay-host"))
+	client.Headers.Set("User-Agent", userAgentString())
 
 	collection := cmd.String("collection")
 	cursor := ""
 	var size int64 = 500
 	for {
 		if collection != "" {
-			resp, err := comatproto.SyncListReposByCollection(ctx, &client, collection, cursor, size)
+			resp, err := comatproto.SyncListReposByCollection(ctx, client, collection, cursor, size)
 			if err != nil {
 				return err
 			}
@@ -147,7 +145,7 @@ func runRelayAccountList(ctx context.Context, cmd *cli.Command) error {
 			}
 			cursor = *resp.Cursor
 		} else {
-			resp, err := comatproto.SyncListRepos(ctx, &client, cursor, size)
+			resp, err := comatproto.SyncListRepos(ctx, client, cursor, size)
 			if err != nil {
 				return err
 			}
@@ -194,12 +192,10 @@ func runRelayAccountStatus(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	client := xrpc.Client{
-		Host:      cmd.String("relay-host"),
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(cmd.String("relay-host"))
+	client.Headers.Set("User-Agent", userAgentString())
 
-	r, err := comatproto.SyncGetRepoStatus(ctx, &client, did.String())
+	r, err := comatproto.SyncGetRepoStatus(ctx, client, did.String())
 	if err != nil {
 		return err
 	}
@@ -237,12 +233,10 @@ func runRelayHostRequestCrawl(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := xrpc.Client{
-		Host:      cmd.String("relay-host"),
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(cmd.String("relay-host"))
+	client.Headers.Set("User-Agent", userAgentString())
 
-	err := comatproto.SyncRequestCrawl(ctx, &client, &comatproto.SyncRequestCrawl_Input{Hostname: hostname})
+	err := comatproto.SyncRequestCrawl(ctx, client, &comatproto.SyncRequestCrawl_Input{Hostname: hostname})
 	if err != nil {
 		return err
 	}
@@ -256,15 +250,13 @@ func runRelayHostList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := xrpc.Client{
-		Host:      cmd.String("relay-host"),
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(cmd.String("relay-host"))
+	client.Headers.Set("User-Agent", userAgentString())
 
 	cursor := ""
 	var size int64 = 500
 	for {
-		resp, err := comatproto.SyncListHosts(ctx, &client, cursor, size)
+		resp, err := comatproto.SyncListHosts(ctx, client, cursor, size)
 		if err != nil {
 			return err
 		}
@@ -311,12 +303,10 @@ func runRelayHostStatus(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := xrpc.Client{
-		Host:      cmd.String("relay-host"),
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(cmd.String("relay-host"))
+	client.Headers.Set("User-Agent", userAgentString())
 
-	h, err := comatproto.SyncGetHostStatus(ctx, &client, hostname)
+	h, err := comatproto.SyncGetHostStatus(ctx, client, hostname)
 	if err != nil {
 		return err
 	}
@@ -354,16 +344,14 @@ type hostInfo struct {
 
 func fetchHosts(ctx context.Context, relayHost string) ([]hostInfo, error) {
 
-	client := xrpc.Client{
-		Host:      relayHost,
-		UserAgent: userAgent(),
-	}
+	client := client.NewAPIClient(relayHost)
+	client.Headers.Set("User-Agent", userAgentString())
 
 	hosts := []hostInfo{}
 	cursor := ""
 	var size int64 = 500
 	for {
-		resp, err := comatproto.SyncListHosts(ctx, &client, cursor, size)
+		resp, err := comatproto.SyncListHosts(ctx, client, cursor, size)
 		if err != nil {
 			return nil, err
 		}
