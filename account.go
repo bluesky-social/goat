@@ -203,7 +203,13 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	_, err = refreshAuthSession(ctx, *username, cmd.String("app-password"), cmd.String("pds-host"), cmd.String("auth-factor-token"))
+	// Use local pds-host flag if set, otherwise fall back to global pds-url
+	pdsHost := cmd.String("pds-host")
+	if pdsHost == "" {
+		pdsHost = cmd.String("pds-url")
+	}
+
+	_, err = refreshAuthSession(ctx, *username, cmd.String("app-password"), pdsHost, cmd.String("auth-factor-token"))
 	return err
 }
 
@@ -216,7 +222,7 @@ func runAccountLookup(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -447,7 +453,14 @@ func runAccountServiceAuthOffline(ctx context.Context, cmd *cli.Command) error {
 func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
 
 	// validate args
+	// Use local pds-host flag if set (required), otherwise fall back to global pds-url
 	pdsHost := cmd.String("pds-host")
+	if pdsHost == "" {
+		pdsHost = cmd.String("pds-url")
+	}
+	if pdsHost == "" {
+		return fmt.Errorf("PDS host is required (use --pds-host or set ATP_PDS_URL)")
+	}
 	if !strings.Contains(pdsHost, "://") {
 		return fmt.Errorf("PDS host is not a url: %s", pdsHost)
 	}

@@ -15,13 +15,41 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
+func getConfiguredDirectory(cmd *cli.Command) identity.Directory {
+	plcURL := cmd.String("plc-url")
+	pdsURL := cmd.String("pds-url")
+
+	if plcURL == "" && pdsURL == "" {
+		return identity.DefaultDirectory()
+	}
+
+	baseDir := &identity.BaseDirectory{}
+	if plcURL != "" {
+		baseDir.PLCURL = plcURL
+	}
+	if pdsURL != "" {
+		// Note: BaseDirectory doesn't have a PDS field, but we can handle this
+		// in specific commands that need PDS override
+	}
+	return baseDir
+}
+
+func resolveIdent(ctx context.Context, cmd *cli.Command, arg string) (*identity.Identity, error) {
 	id, err := syntax.ParseAtIdentifier(arg)
 	if err != nil {
 		return nil, err
 	}
 
-	dir := identity.DefaultDirectory()
+	dir := getConfiguredDirectory(cmd)
+	return dir.Lookup(ctx, *id)
+}
+
+func resolveIdentWithDirectory(ctx context.Context, arg string, dir identity.Directory) (*identity.Identity, error) {
+	id, err := syntax.ParseAtIdentifier(arg)
+	if err != nil {
+		return nil, err
+	}
+
 	return dir.Lookup(ctx, *id)
 }
 

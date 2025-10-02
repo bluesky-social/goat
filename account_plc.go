@@ -19,14 +19,7 @@ import (
 var cmdAccountPlc = &cli.Command{
 	Name:  "plc",
 	Usage: "commands for managing PLC identity (DID) via PDS host",
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "plc-host",
-			Usage:   "method, hostname, and port of PLC registry",
-			Value:   "https://plc.directory",
-			Sources: cli.EnvVars("ATP_PLC_HOST"),
-		},
-	},
+	Flags: []cli.Flag{},
 	Commands: []*cli.Command{
 		&cli.Command{
 			Name:   "recommended",
@@ -228,7 +221,11 @@ func runAccountPlcCurrent(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), did)
+	plcURL := cmd.String("plc-url")
+	if plcURL == "" {
+		plcURL = "https://plc.directory"
+	}
+	plcData, err := fetchPLCData(ctx, plcURL, did)
 	if err != nil {
 		return err
 	}
@@ -267,7 +264,11 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// 1. fetch current PLC op: plc.directory/{did}/data
-	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), did)
+	plcURL := cmd.String("plc-url")
+	if plcURL == "" {
+		plcURL = "https://plc.directory"
+	}
+	plcData, err := fetchPLCData(ctx, plcURL, did)
 	if err != nil {
 		return err
 	}
