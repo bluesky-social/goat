@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
@@ -26,7 +27,7 @@ var cmdRecord = &cli.Command{
 		&cli.Command{
 			Name:      "create",
 			Usage:     "create record from JSON",
-			ArgsUsage: `<file>`,
+			ArgsUsage: `<file|->`,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:    "rkey",
@@ -204,7 +205,7 @@ func runRecordList(ctx context.Context, cmd *cli.Command) error {
 func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 	recordPath := cmd.Args().First()
 	if recordPath == "" {
-		return fmt.Errorf("need to provide file path as an argument")
+		return fmt.Errorf("need to provide file path or '-' for stdin as an argument")
 	}
 
 	xrpcc, err := loadAuthClient(ctx)
@@ -214,7 +215,12 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	recordBytes, err := os.ReadFile(recordPath)
+	inputReader, err := getFileOrStdin(recordPath)
+	if err != nil {
+		return err
+	}
+
+	recordBytes, err := io.ReadAll(inputReader)
 	if err != nil {
 		return err
 	}
