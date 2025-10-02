@@ -11,11 +11,11 @@ import (
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/client"
 	"github.com/bluesky-social/indigo/atproto/data"
 	"github.com/bluesky-social/indigo/atproto/repo"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/ipfs/go-cid"
 	"github.com/urfave/cli/v3"
@@ -105,17 +105,15 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      ident.PDSEndpoint(),
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
+	c := client.NewAPIClient(ident.PDSEndpoint())
+	c.Headers.Set("User-Agent", userAgentString())
+	if c.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
 	}
 
 	// set longer timeout, for large CAR files
-	xrpcc.Client = util.RobustHTTPClient()
-	xrpcc.Client.Timeout = 600 * time.Second
+	c.Client = util.RobustHTTPClient()
+	c.Client.Timeout = 600 * time.Second
 
 	carPath := cmd.String("output")
 	if carPath == "" {
@@ -132,9 +130,9 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 	}
 	defer output.Close()
 	if carPath != stdIOPath {
-		fmt.Printf("downloading from %s to: %s\n", xrpcc.Host, carPath)
+		fmt.Printf("downloading from %s to: %s\n", c.Host, carPath)
 	}
-	repoBytes, err := comatproto.SyncGetRepo(ctx, &xrpcc, ident.DID.String(), "")
+	repoBytes, err := comatproto.SyncGetRepo(ctx, c, ident.DID.String(), "")
 	if err != nil {
 		return err
 	}
