@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bluesky-social/indigo/atproto/crypto"
+	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util"
@@ -426,7 +426,7 @@ func runPLCGenesis(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	for _, rotationKey := range cmd.StringSlice("rotation-key") {
-		if _, err := crypto.ParsePublicDIDKey(rotationKey); err != nil {
+		if _, err := atcrypto.ParsePublicDIDKey(rotationKey); err != nil {
 			return err
 		}
 		op.RotationKeys = append(op.RotationKeys, rotationKey)
@@ -444,7 +444,7 @@ func runPLCGenesis(ctx context.Context, cmd *cli.Command) error {
 
 	atprotoKey := cmd.String("atproto-key")
 	if atprotoKey != "" {
-		if _, err := crypto.ParsePublicDIDKey(atprotoKey); err != nil {
+		if _, err := atcrypto.ParsePublicDIDKey(atprotoKey); err != nil {
 			return err
 		}
 		op.VerificationMethods["atproto"] = atprotoKey
@@ -536,7 +536,7 @@ func runPLCSign(ctx context.Context, cmd *cli.Command) error {
 	// Note: we do not require that the op is currently unsigned.
 	// If it's already signed, we'll re-sign it.
 
-	privkey, err := crypto.ParsePrivateMultibase(privStr)
+	privkey, err := atcrypto.ParsePrivateMultibase(privStr)
 	if err != nil {
 		return err
 	}
@@ -683,7 +683,7 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	for _, rotationKey := range cmd.StringSlice("remove-rotation-key") {
-		if _, err := crypto.ParsePublicDIDKey(rotationKey); err != nil {
+		if _, err := atcrypto.ParsePublicDIDKey(rotationKey); err != nil {
 			return err
 		}
 		removeSuccess := false
@@ -699,7 +699,7 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	for _, rotationKey := range cmd.StringSlice("add-rotation-key") {
-		if _, err := crypto.ParsePublicDIDKey(rotationKey); err != nil {
+		if _, err := atcrypto.ParsePublicDIDKey(rotationKey); err != nil {
 			return err
 		}
 		// prepend (Note: if adding multiple rotation keys at once, they'll end up in reverse order)
@@ -727,7 +727,7 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	atprotoKey := cmd.String("atproto-key")
 	if atprotoKey != "" {
-		if _, err := crypto.ParsePublicDIDKey(atprotoKey); err != nil {
+		if _, err := atcrypto.ParsePublicDIDKey(atprotoKey); err != nil {
 			return err
 		}
 		op.VerificationMethods["atproto"] = atprotoKey

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
-	"github.com/bluesky-social/indigo/atproto/data"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -96,7 +96,7 @@ func loadSchemaFile(p string) (map[string]any, error) {
 	// TODO: additional validation?
 
 	// parse as raw data
-	d, err := data.UnmarshalJSON(b)
+	d, err := atdata.UnmarshalJSON(b)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +316,7 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 
-		rawNSID, err := data.ExtractTypeJSON(recordBytes)
+		rawNSID, err := atdata.ExtractTypeJSON(recordBytes)
 		if err != nil {
 			return err
 		}
@@ -325,7 +325,7 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 
-		recordData, err = data.UnmarshalJSON(recordBytes)
+		recordData, err = atdata.UnmarshalJSON(recordBytes)
 		if err != nil {
 			return err
 		}

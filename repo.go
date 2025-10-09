@@ -11,7 +11,7 @@ import (
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/data"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/repo"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util"
@@ -289,7 +289,7 @@ func runRepoUnpack(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 
-		rec, err := data.UnmarshalCBOR(recBytes)
+		rec, err := atdata.UnmarshalCBOR(recBytes)
 		if err != nil {
 			return err
 		}

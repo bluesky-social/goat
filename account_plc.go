@@ -9,7 +9,7 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/crypto"
+	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/did-method-plc/go-didplc"
 
@@ -249,7 +249,7 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// check that it is a valid pubkey
-	_, err := crypto.ParsePublicDIDKey(newKeyStr)
+	_, err := atcrypto.ParsePublicDIDKey(newKeyStr)
 	if err != nil {
 		return err
 	}

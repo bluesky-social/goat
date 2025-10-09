@@ -14,7 +14,7 @@ import (
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/data"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/repo"
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -457,7 +457,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 			}
 
 			out["action"] = op.Action
-			d, err := data.UnmarshalCBOR(recBytes)
+			d, err := atdata.UnmarshalCBOR(recBytes)
 			if err != nil {
 				slog.Warn("failed to parse record CBOR")
 				continue

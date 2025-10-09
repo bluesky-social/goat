@@ -8,8 +8,8 @@ import (
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/auth"
-	"github.com/bluesky-social/indigo/atproto/crypto"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/xrpc"
 
@@ -402,7 +402,7 @@ func runAccountServiceAuthOffline(ctx context.Context, cmd *cli.Command) error {
 	if privStr == "" {
 		return fmt.Errorf("private key must be provided")
 	}
-	privkey, err := crypto.ParsePrivateMultibase(privStr)
+	privkey, err := atcrypto.ParsePrivateMultibase(privStr)
 	if err != nil {
 		return fmt.Errorf("failed parsing private key: %w", err)
 	}
