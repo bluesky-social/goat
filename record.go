@@ -8,7 +8,7 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/data"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/xrpc"
@@ -219,12 +219,12 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	recordVal, err := data.UnmarshalJSON(recordBytes)
+	recordVal, err := atdata.UnmarshalJSON(recordBytes)
 	if err != nil {
 		return err
 	}
 
-	nsid, err := data.ExtractTypeJSON(recordBytes)
+	nsid, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
 		return err
 	}
@@ -273,12 +273,12 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	recordVal, err := data.UnmarshalJSON(recordBytes)
+	recordVal, err := atdata.UnmarshalJSON(recordBytes)
 	if err != nil {
 		return err
 	}
 
-	nsid, err := data.ExtractTypeJSON(recordBytes)
+	nsid, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
 		return err
 	}

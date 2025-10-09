@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
-	"github.com/bluesky-social/indigo/atproto/data"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/xrpc"
@@ -27,7 +27,7 @@ func fetchRecord(ctx context.Context, ident identity.Identity, aturi syntax.ATUR
 	if nil == resp.Value {
 		return nil, fmt.Errorf("empty record in response")
 	}
-	record, err := data.UnmarshalJSON(*resp.Value)
+	record, err := atdata.UnmarshalJSON(*resp.Value)
 	if err != nil {
 		return nil, fmt.Errorf("fetched record was invalid data: %w", err)
 	}

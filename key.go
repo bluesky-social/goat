@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bluesky-social/indigo/atproto/crypto"
+	"github.com/bluesky-social/indigo/atproto/atcrypto"
 
 	"github.com/urfave/cli/v3"
 )
@@ -39,18 +39,18 @@ var cmdKey = &cli.Command{
 }
 
 func runKeyGenerate(ctx context.Context, cmd *cli.Command) error {
-	var priv crypto.PrivateKey
+	var priv atcrypto.PrivateKey
 	var privMultibase string
 	switch cmd.String("type") {
 	case "", "P-256", "p256", "ES256", "secp256r1":
-		sec, err := crypto.GeneratePrivateKeyP256()
+		sec, err := atcrypto.GeneratePrivateKeyP256()
 		if err != nil {
 			return err
 		}
 		privMultibase = sec.Multibase()
 		priv = sec
 	case "K-256", "k256", "ES256K", "secp256k1":
-		sec, err := crypto.GeneratePrivateKeyK256()
+		sec, err := atcrypto.GeneratePrivateKeyK256()
 		if err != nil {
 			return err
 		}
@@ -75,13 +75,13 @@ func runKeyGenerate(ctx context.Context, cmd *cli.Command) error {
 
 func descKeyType(val interface{}) string {
 	switch val.(type) {
-	case *crypto.PublicKeyP256, crypto.PublicKeyP256:
+	case *atcrypto.PublicKeyP256, atcrypto.PublicKeyP256:
 		return "P-256 / secp256r1 / ES256 public key"
-	case *crypto.PrivateKeyP256, crypto.PrivateKeyP256:
+	case *atcrypto.PrivateKeyP256, atcrypto.PrivateKeyP256:
 		return "P-256 / secp256r1 / ES256 private key"
-	case *crypto.PublicKeyK256, crypto.PublicKeyK256:
+	case *atcrypto.PublicKeyK256, atcrypto.PublicKeyK256:
 		return "K-256 / secp256k1 / ES256K public key"
-	case *crypto.PrivateKeyK256, crypto.PrivateKeyK256:
+	case *atcrypto.PrivateKeyK256, atcrypto.PrivateKeyK256:
 		return "K-256 / secp256k1 / ES256K private key"
 	default:
 		return "unknown"
@@ -94,7 +94,7 @@ func runKeyInspect(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide key as an argument")
 	}
 
-	sec, err := crypto.ParsePrivateMultibase(s)
+	sec, err := atcrypto.ParsePrivateMultibase(s)
 	if nil == err {
 		fmt.Printf("Type: %s\n", descKeyType(sec))
 		fmt.Printf("Encoding: multibase\n")
@@ -106,7 +106,7 @@ func runKeyInspect(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	pub, err := crypto.ParsePublicMultibase(s)
+	pub, err := atcrypto.ParsePublicMultibase(s)
 	if nil == err {
 		fmt.Printf("Type: %s\n", descKeyType(pub))
 		fmt.Printf("Encoding: multibase\n")
@@ -114,7 +114,7 @@ func runKeyInspect(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	pub, err = crypto.ParsePublicDIDKey(s)
+	pub, err = atcrypto.ParsePublicDIDKey(s)
 	if nil == err {
 		fmt.Printf("Type: %s\n", descKeyType(pub))
 		fmt.Printf("Encoding: DID Key\n")
