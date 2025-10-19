@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/client"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 
 	"github.com/urfave/cli/v3"
 )
@@ -36,7 +36,7 @@ func runPdsDescribe(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("PDS host is not a url: %s", pdsHost)
 	}
 
-	client := client.NewAPIClient(pdsHost)
+	client := atclient.NewAPIClient(pdsHost)
 	client.Headers.Set("User-Agent", userAgentString())
 
 	resp, err := comatproto.ServerDescribeServer(ctx, client)

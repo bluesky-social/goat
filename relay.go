@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/atproto/client"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -124,7 +124,7 @@ func runRelayAccountList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := client.NewAPIClient(cmd.String("relay-host"))
+	client := atclient.NewAPIClient(cmd.String("relay-host"))
 	client.Headers.Set("User-Agent", userAgentString())
 
 	collection := cmd.String("collection")
@@ -192,7 +192,7 @@ func runRelayAccountStatus(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	client := client.NewAPIClient(cmd.String("relay-host"))
+	client := atclient.NewAPIClient(cmd.String("relay-host"))
 	client.Headers.Set("User-Agent", userAgentString())
 
 	r, err := comatproto.SyncGetRepoStatus(ctx, client, did.String())
@@ -233,7 +233,7 @@ func runRelayHostRequestCrawl(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := client.NewAPIClient(cmd.String("relay-host"))
+	client := atclient.NewAPIClient(cmd.String("relay-host"))
 	client.Headers.Set("User-Agent", userAgentString())
 
 	err := comatproto.SyncRequestCrawl(ctx, client, &comatproto.SyncRequestCrawl_Input{Hostname: hostname})
@@ -250,7 +250,7 @@ func runRelayHostList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := client.NewAPIClient(cmd.String("relay-host"))
+	client := atclient.NewAPIClient(cmd.String("relay-host"))
 	client.Headers.Set("User-Agent", userAgentString())
 
 	cursor := ""
@@ -303,7 +303,7 @@ func runRelayHostStatus(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("unexpected arguments")
 	}
 
-	client := client.NewAPIClient(cmd.String("relay-host"))
+	client := atclient.NewAPIClient(cmd.String("relay-host"))
 	client.Headers.Set("User-Agent", userAgentString())
 
 	h, err := comatproto.SyncGetHostStatus(ctx, client, hostname)
@@ -344,7 +344,7 @@ type hostInfo struct {
 
 func fetchHosts(ctx context.Context, relayHost string) ([]hostInfo, error) {
 
-	client := client.NewAPIClient(relayHost)
+	client := atclient.NewAPIClient(relayHost)
 	client.Headers.Set("User-Agent", userAgentString())
 
 	hosts := []hostInfo{}
