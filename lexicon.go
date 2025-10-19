@@ -10,10 +10,10 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atdata"
+	"github.com/bluesky-social/indigo/atproto/client"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/urfave/cli/v3"
 )
@@ -229,11 +229,9 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      ident.PDSEndpoint(),
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
+	c := client.NewAPIClient(ident.PDSEndpoint())
+	c.Headers.Set("User-Agent", userAgentString())
+	if c.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
 	}
 
@@ -242,7 +240,7 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	cursor := ""
 	for {
 		// collection string, cursor string, limit int64, repo string, reverse bool
-		resp, err := agnostic.RepoListRecords(ctx, &xrpcc, "com.atproto.lexicon.schema", cursor, 100, ident.DID.String(), false)
+		resp, err := agnostic.RepoListRecords(ctx, c, "com.atproto.lexicon.schema", cursor, 100, ident.DID.String(), false)
 		if err != nil {
 			return err
 		}
