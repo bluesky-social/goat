@@ -68,10 +68,10 @@ var cmdAccount = &cli.Command{
 			Action: runAccountDeactivate,
 		},
 		&cli.Command{
-			Name:      "lookup",
+			Name:      "status",
 			Usage:     "show basic account hosting status for any account",
 			ArgsUsage: `<at-identifier>`,
-			Action:    runAccountLookup,
+			Action:    runAccountStatus,
 		},
 		&cli.Command{
 			Name:      "update-handle",
@@ -80,9 +80,9 @@ var cmdAccount = &cli.Command{
 			Action:    runAccountUpdateHandle,
 		},
 		&cli.Command{
-			Name:   "status",
-			Usage:  "show current account status at PDS",
-			Action: runAccountStatus,
+			Name:   "check-auth",
+			Usage:  "check session auth and current account status",
+			Action: runAccountCheckAuth,
 		},
 		&cli.Command{
 			Name:   "missing-blobs",
@@ -211,7 +211,7 @@ func runAccountLogout(ctx context.Context, cmd *cli.Command) error {
 	return wipeAuthSession()
 }
 
-func runAccountLookup(ctx context.Context, cmd *cli.Command) error {
+func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	username := cmd.Args().First()
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
@@ -246,7 +246,7 @@ func runAccountLookup(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
+func runAccountCheckAuth(ctx context.Context, cmd *cli.Command) error {
 
 	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
