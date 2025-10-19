@@ -8,7 +8,9 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- updated `indigo` dependency, for permission-set lexicon parsing
+- updated `indigo` dependency, for permission-set lexicon parsing and package renames
+- start using `indigo:atproto/client` package for some API requests
+- update `account` subcommands: `status` renamed to `check-auth`, and `lookup` renamed to `status`
 
 ## [0.1.1] - 2025-08-12
 
