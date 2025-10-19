@@ -8,8 +8,8 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
-	"github.com/bluesky-social/indigo/atproto/client"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
@@ -151,7 +151,7 @@ func runRecordList(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	c := client.NewAPIClient(ident.PDSEndpoint())
+	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Headers.Set("User-Agent", userAgentString())
 	if c.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
