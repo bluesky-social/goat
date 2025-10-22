@@ -46,7 +46,7 @@ func run(args []string) error {
 		cmdRecord,
 		cmdSyntax,
 		cmdKey,
-		cmdPds,
+		cmdPDS,
 		cmdRelay,
 	}
 	return app.Run(context.Background(), args)

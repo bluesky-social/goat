@@ -25,6 +25,20 @@ func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
 	return dir.Lookup(ctx, *id)
 }
 
+func resolveToDID(ctx context.Context, s string) (syntax.DID, error) {
+	atid, err := syntax.ParseAtIdentifier(s)
+	if err != nil {
+		return "", err
+	}
+	if atid.IsDID() {
+		did, _ := atid.AsDID()
+		return did, nil
+	}
+	hdl, _ := atid.AsHandle()
+	dir := identity.BaseDirectory{}
+	return dir.ResolveHandle(ctx, hdl)
+}
+
 const stdIOPath = "-"
 
 func getFileOrStdin(path string) (io.Reader, error) {
