@@ -35,17 +35,14 @@ var cmdRelayAdmin = &cli.Command{
 			Usage: "commands for managing accounts",
 			Commands: []*cli.Command{
 				&cli.Command{
-					Name:  "takedown",
-					Usage: "takedown a single account on relay",
+					Name:      "takedown",
+					ArgsUsage: "<account>",
+					Usage:     "takedown a single account on relay",
 					Flags: []cli.Flag{
-						&cli.StringFlag{
-							Name:    "collection",
-							Aliases: []string{"c"},
-							Usage:   "collection (NSID) to match",
-						},
 						&cli.BoolFlag{
-							Name:  "reverse",
-							Usage: "un-takedown",
+							Name:    "reverse",
+							Aliases: []string{"r"},
+							Usage:   "un-takedown",
 						},
 					},
 					Action: runRelayAdminAccountTakedown,
@@ -74,8 +71,9 @@ var cmdRelayAdmin = &cli.Command{
 					ArgsUsage: `<hostname>`,
 					Flags: []cli.Flag{
 						&cli.BoolFlag{
-							Name:  "reverse",
-							Usage: "un-takedown",
+							Name:    "reverse",
+							Aliases: []string{"r"},
+							Usage:   "un-takedown",
 						},
 					},
 					Action: runRelayAdminHostBlock,
@@ -109,8 +107,9 @@ var cmdRelayAdmin = &cli.Command{
 					ArgsUsage: `<domain>`,
 					Flags: []cli.Flag{
 						&cli.BoolFlag{
-							Name:  "reverse",
-							Usage: "un-takedown",
+							Name:    "reverse",
+							Aliases: []string{"r"},
+							Usage:   "un-takedown",
 						},
 					},
 					Action: runRelayAdminDomainBan,
