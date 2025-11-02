@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -13,6 +16,7 @@ import (
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/xrpc"
+	"github.com/did-method-plc/go-didplc"
 
 	"github.com/urfave/cli/v3"
 )
@@ -214,20 +218,51 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	// NOTE: to work with did:web or non-PDS-managed did:plc, need to do manual migraiton process
 	slog.Info("updating identity to new host")
 
-	credsResp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, &newClient)
+	lastOp, err := getLastDidOp(did)
+	if err != nil {
+		return fmt.Errorf("failed fetching last operation: %w", err)
+	}
+	oldRecommended, err := getRecommendedDidCredentials(ctx, oldClient)
+	if err != nil {
+		return fmt.Errorf("failed fetching old credentials: %w", err)
+	}
+	newRecommended, err := getRecommendedDidCredentials(ctx, &newClient)
 	if err != nil {
 		return fmt.Errorf("failed fetching new credentials: %w", err)
 	}
-	credsBytes, err := json.Marshal(credsResp)
-	if err != nil {
-		return nil
+
+	rotationKeys := make([]string, 0)
+	for _, rotationKey := range lastOp.RotationKeys {
+		if !slices.Contains(oldRecommended.RotationKeys, rotationKey) {
+			rotationKeys = append(rotationKeys, rotationKey)
+		}
+	}
+	for _, rotationKey := range newRecommended.RotationKeys {
+		rotationKeys = append(rotationKeys, rotationKey)
+	}
+	mergedOp := didplc.RegularOp{
+		AlsoKnownAs: newRecommended.AlsoKnownAs,
+		RotationKeys: rotationKeys,
+		VerificationMethods: newRecommended.VerificationMethods,
+		Services: lastOp.Services,
+	}
+	for opType, _ := range oldRecommended.Services {
+		delete(mergedOp.Services, opType)
+	}
+	for opType, op := range newRecommended.Services {
+		mergedOp.Services[opType] = op
 	}
 
 	var unsignedOp agnostic.IdentitySignPlcOperation_Input
-	if err = json.Unmarshal(credsBytes, &unsignedOp); err != nil {
+	credBytes, err := json.Marshal(mergedOp)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(credBytes, &unsignedOp); err != nil {
 		return fmt.Errorf("failed parsing PLC op: %w", err)
 	}
 	unsignedOp.Token = &plcToken
+
 
 	// NOTE: could add additional sanity checks here that any extra rotation keys were retained, and that old alsoKnownAs and service entries are retained? The stakes aren't super high for the later, as PLC has the full history. PLC and the new PDS already implement some basic sanity checks.
 
@@ -257,4 +292,55 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 
 	slog.Info("account migration completed")
 	return nil
+}
+
+func getRecommendedDidCredentials(ctx context.Context, client *xrpc.Client) (didplc.RegularOp, error) {
+	var operation didplc.RegularOp
+	credsResp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, client)
+	if err != nil {
+		return operation, fmt.Errorf("failed fetching new credentials: %w", err)
+	}
+	credsBytes, err := json.MarshalIndent(credsResp, "", "  ")
+	if err != nil {
+		return operation, err
+	}
+
+	if err = json.Unmarshal(credsBytes, &operation); err != nil {
+		return operation, fmt.Errorf("failed parsing PLC op: %w", err)
+	}
+	return operation, nil
+}
+
+func getLastDidOp(did string) (didplc.RegularOp, error) {
+	var lastOp didplc.RegularOp
+	url := fmt.Sprintf("https://plc.directory/%s/log", did)
+	resp, err := http.Get(url)
+	if err != nil {
+		return lastOp, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return lastOp, fmt.Errorf("PLC HTTP request failed")
+	}
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return lastOp, err
+	}
+
+	// parse JSON and reformat for printing
+	var oplog []map[string]interface{}
+	err = json.Unmarshal(respBytes, &oplog)
+	if err != nil {
+		return lastOp, err
+	}
+
+	lastOpBytes, err := json.Marshal(oplog[len(oplog) - 1])
+	if err != nil {
+		return lastOp, err
+	}
+	if err = json.Unmarshal(lastOpBytes, &lastOp); err != nil {
+		return lastOp, fmt.Errorf("failed parsing PLC op: %w", err)
+	}
+
+	return lastOp, nil
 }
