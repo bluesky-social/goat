@@ -6,7 +6,7 @@ toolchain go1.25.1
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/bluesky-social/indigo v0.0.0-20251009212240-20524de167fe
+	github.com/bluesky-social/indigo v0.0.0-20251125184450-35c1e15d2e5f
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
@@ -21,7 +21,6 @@ require (
 require (
 	github.com/RussellLuo/slidingwindow v0.0.0-20200528002341-535bb99d338b // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/carlmjohnson/versioninfo v0.22.5 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
