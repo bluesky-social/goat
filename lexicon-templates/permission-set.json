@@ -1,0 +1,34 @@
+{
+  "lexicon": 1,
+  "id": "com.example.authBasic",
+  "defs": {
+    "main": {
+      "type": "permission-set",
+      "title": "TODO: user-facing short name of permission set",
+      "title:langs": {
+        "pt-BR": "TODO: brazilian portugese translation",
+        "ja": "TODO: japanese translation"
+      },
+      "detail": "TODO: user-facing short description of scope of permissions",
+      "detail:langs": {
+        "pt-BR": "TODO: brazilian portugese translation",
+        "ja": "TODO: japanese translation"
+      },
+      "permissions": [
+        {
+          "type": "permission",
+          "resource": "repo",
+          "collection": ["com.example.post"]
+        },
+        {
+          "type": "permission",
+          "resource": "rpc",
+          "inheritAud": true,
+          "lxm": [
+            "app.example.getPreferences"
+          ]
+        }
+      ]
+    }
+  }
+}

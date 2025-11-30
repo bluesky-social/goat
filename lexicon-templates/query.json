@@ -1,0 +1,31 @@
+{
+  "lexicon": 1,
+  "id": "com.example.getNumber",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "TODO: basic API endpoint",
+      "parameters": {
+        "type": "params",
+        "properties": {
+          "maximum": {
+            "type": "integer",
+            "description": "maximum size of response"
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["number"],
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

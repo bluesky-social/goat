@@ -36,18 +36,12 @@ var cmdLex = &cli.Command{
 			Action: runLexResolve,
 		},
 		&cli.Command{
+			// DEPRECATED
 			Name:      "parse",
 			Usage:     "parse and validate Lexicon schema files",
 			ArgsUsage: `<path>+`,
 			Flags:     []cli.Flag{},
 			Action:    runLexParse,
-		},
-		&cli.Command{
-			Name:      "publish",
-			Usage:     "add schema JSON files to atproto repo",
-			ArgsUsage: `<path>+`,
-			Flags:     []cli.Flag{},
-			Action:    runLexPublish,
 		},
 		&cli.Command{
 			Name:      "ls",
@@ -74,6 +68,15 @@ var cmdLex = &cli.Command{
 			},
 			Action: runLexValidate,
 		},
+		cmdLexStatus,
+		cmdLexLint,
+		cmdLexBreaking,
+		cmdLexDiff,
+		cmdLexPull,
+		cmdLexPublish,
+		cmdLexUnpublish,
+		cmdLexNew,
+		cmdLexCheckDNS,
 	},
 }
 
@@ -113,57 +116,6 @@ func runLexParse(ctx context.Context, cmd *cli.Command) error {
 			return fmt.Errorf("failed to parse %s: %w", path, err)
 		}
 		fmt.Printf("%s: success\n", path)
-	}
-	return nil
-}
-
-func runLexPublish(ctx context.Context, cmd *cli.Command) error {
-	if cmd.Args().Len() <= 0 {
-		return fmt.Errorf("require at least one path to publish")
-	}
-
-	client, err := loadAuthClient(ctx)
-	if err == ErrNoAuthSession {
-		return fmt.Errorf("auth required, but not logged in")
-	} else if err != nil {
-		return err
-	}
-
-	validateFlag := false
-
-	for _, path := range cmd.Args().Slice() {
-		recordVal, err := loadSchemaFile(path)
-		if err != nil {
-			return fmt.Errorf("failed to parse %s: %w", path, err)
-		}
-
-		recordVal["$type"] = "com.atproto.lexicon.schema"
-		val, ok := recordVal["id"]
-		if !ok {
-			return fmt.Errorf("missing NSID in Lexicon schema")
-		}
-		rawNSID, ok := val.(string)
-		if !ok {
-			return fmt.Errorf("missing NSID in Lexicon schema")
-		}
-		nsid, err := syntax.ParseNSID(rawNSID)
-		if err != nil {
-			return err
-		}
-		nsidStr := nsid.String()
-
-		resp, err := agnostic.RepoPutRecord(ctx, client, &agnostic.RepoPutRecord_Input{
-			Collection: "com.atproto.lexicon.schema",
-			Repo:       client.AccountDID.String(),
-			Record:     recordVal,
-			Rkey:       nsidStr,
-			Validate:   &validateFlag,
-		})
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\t%s\n", resp.Uri, resp.Cid)
 	}
 	return nil
 }

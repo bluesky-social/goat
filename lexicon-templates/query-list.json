@@ -1,0 +1,50 @@
+{
+  "lexicon": 1,
+  "id": "com.example.listThings",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "TODO: enumerates objects",
+      "parameters": {
+        "type": "params",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          },
+          "cursor": { "type": "string" }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["values"],
+          "properties": {
+            "cursor": { "type": "string" },
+            "values": {
+              "type": "array",
+              "items": { "type": "ref", "ref": "#thing" }
+            }
+          }
+        }
+      }
+    },
+    "thing": {
+      "type": "object",
+      "required": [
+        "uri",
+        "cid",
+        "title"
+      ],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string", "format": "cid" },
+        "title": { "type": "string" },
+        "extra": { "type": "unknown" }
+      }
+    }
+  }
+}

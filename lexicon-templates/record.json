@@ -1,0 +1,39 @@
+{
+  "lexicon": 1,
+  "id": "com.example.record",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "TODO: describe purpose of this schema",
+      "key": "any",
+      "record": {
+        "type": "object",
+        "required": ["name", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "maxLength": 640,
+            "minLength": 1,
+            "description": "TODO: title name of record; can not be empty"
+          },
+          "description": {
+            "type": "string",
+            "maxGraphemes": 300,
+            "maxLength": 3000
+          },
+          "descriptionFacets": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "app.bsky.richtext.facet" }
+          },
+          "avatar": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg"],
+            "maxSize": 2000000
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "lexicon": 1,
+  "id": "com.example.getThing",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "TODO: retrieves a hydrated 'view' of a record.",
+      "parameters": {
+        "type": "params",
+        "required": ["uri"],
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "Reference (AT-URI) of the record to hydrate."
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "ref",
+          "ref": "#thingView"
+        }
+      }
+    },
+    "thingView": {
+      "type": "object",
+      "required": ["record"],
+      "properties": {
+		"record": { "type": "ref", "ref": "com.example.record" },
+        "viewer": { "type": "ref", "ref": "#viewerState" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "com.atproto.label.defs#label" }
+        }
+      }
+    },
+    "viewerState": {
+      "type": "object",
+      "description": "Metadata about the requesting account's relationship with the subject. Only has meaningful content for authed requests.",
+      "properties": {
+        "muted": { "type": "boolean" }
+      }
+    }
+  }
+}

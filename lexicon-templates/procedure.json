@@ -1,0 +1,28 @@
+{
+  "lexicon": 1,
+  "id": "com.example.muteThing",
+  "defs": {
+    "main": {
+      "type": "procedure",
+      "description": "TODO: description of this API endpoint",
+      "input": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["subject"],
+          "properties": {
+            "subject": { "type": "string", "format": "at-identifier" }
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": [],
+          "properties": {}
+        }
+      }
+    }
+  }
+}
