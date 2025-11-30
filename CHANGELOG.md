@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## UNRELEASED
+
+### Changed
+
+- require Go v1.25
+- update indigo dependency
+- finish migration from `indigo:xrpc` to `indigo:atproto/atclient` for all HTTP API requests
+
 ## [0.1.2] - 2025-10-21
 
 ### Changed
