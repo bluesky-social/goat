@@ -84,12 +84,6 @@ func configLogger(cmd *cli.Command, writer io.Writer) *slog.Logger {
 	return logger
 }
 
-// returns a pointer because that is what xrpc.Client expects
-func userAgent() *string {
-	s := userAgentString()
-	return &s
-}
-
 func userAgentString() string {
 	return fmt.Sprintf("goat/%s", versioninfo.Short())
 }
