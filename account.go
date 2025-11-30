@@ -8,10 +8,11 @@ import (
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/auth"
+	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/urfave/cli/v3"
 )
@@ -198,13 +199,37 @@ var cmdAccount = &cli.Command{
 
 func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
-	username, err := syntax.ParseAtIdentifier(cmd.String("username"))
+	var client *atclient.APIClient
+	var err error
+
+	pdsHost := cmd.String("pds-host")
+	if pdsHost != "" {
+		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+	} else {
+		username, err := syntax.ParseAtIdentifier(cmd.String("username"))
+		if err != nil {
+			return err
+		}
+		dir := identity.DefaultDirectory()
+		client, err = atclient.LoginWithPassword(ctx, dir, *username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+	}
 	if err != nil {
 		return err
 	}
 
-	_, err = refreshAuthSession(ctx, *username, cmd.String("app-password"), cmd.String("pds-host"), cmd.String("auth-factor-token"))
-	return err
+	passAuth, ok := client.Auth.(*atclient.PasswordAuth)
+	if !ok {
+		return fmt.Errorf("expected password auth")
+	}
+
+	sess := AuthSession{
+		DID:          passAuth.Session.AccountDID,
+		PDS:          passAuth.Session.Host,
+		Password:     cmd.String("app-password"),
+		AccessToken:  passAuth.Session.AccessToken,
+		RefreshToken: passAuth.Session.RefreshToken,
+	}
+	return persistAuthSession(&sess)
 }
 
 func runAccountLogout(ctx context.Context, cmd *cli.Command) error {
@@ -222,15 +247,13 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      ident.PDSEndpoint(),
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
+	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client.Headers.Set("User-Agent", userAgentString())
+	if client.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
 	}
 
-	status, err := comatproto.SyncGetRepoStatus(ctx, &xrpcc, ident.DID.String())
+	status, err := comatproto.SyncGetRepoStatus(ctx, client, ident.DID.String())
 	if err != nil {
 		return err
 	}
@@ -264,7 +287,7 @@ func runAccountCheckAuth(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("DID: %s\n", client.Auth.Did)
+	fmt.Printf("DID: %s\n", client.AccountDID)
 	fmt.Printf("Host: %s\n", client.Host)
 	fmt.Println(string(b))
 
@@ -487,20 +510,21 @@ func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      pdsHost,
-		UserAgent: userAgent(),
-	}
+	client := atclient.NewAPIClient(pdsHost)
+	client.Headers.Set("User-Agent", userAgentString())
 
 	raw = cmd.String("service-auth")
 	if raw != "" && params.Did != nil {
-		xrpcc.Auth = &xrpc.AuthInfo{
-			Did:       *params.Did,
-			AccessJwt: raw,
+		// Hack to inject service auth token as one-time access token (any refresh would fail)
+		client.Auth = &atclient.PasswordAuth{
+			Session: atclient.PasswordSessionData{
+				AccountDID:  syntax.DID(*params.Did),
+				AccessToken: raw,
+			},
 		}
 	}
 
-	resp, err := comatproto.ServerCreateAccount(ctx, &xrpcc, params)
+	resp, err := comatproto.ServerCreateAccount(ctx, client, params)
 	if err != nil {
 		return fmt.Errorf("failed to create account: %w", err)
 	}

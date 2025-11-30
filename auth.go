@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/adrg/xdg"
 )
@@ -20,6 +21,7 @@ var ErrNoAuthSession = errors.New("no auth session found")
 type AuthSession struct {
 	DID          syntax.DID `json:"did"`
 	Password     string     `json:"password"`
+	AccessToken  string     `json:"access_token"`
 	RefreshToken string     `json:"session_token"`
 	PDS          string     `json:"pds"`
 }
@@ -45,10 +47,7 @@ func persistAuthSession(sess *AuthSession) error {
 	return err
 }
 
-func loadAuthClient(ctx context.Context) (*xrpc.Client, error) {
-
-	// TODO: could also load from env var / cmd
-
+func loadAuthSessionFile() (*AuthSession, error) {
 	fPath, err := xdg.SearchStateFile("goat/auth-session.json")
 	if err != nil {
 		return nil, ErrNoAuthSession
@@ -64,98 +63,51 @@ func loadAuthClient(ctx context.Context) (*xrpc.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	client := xrpc.Client{
-		Host:      sess.PDS,
-		UserAgent: userAgent(),
-		Auth: &xrpc.AuthInfo{
-			Did: sess.DID.String(),
-			// NOTE: using refresh in access location for "refreshSession" call
-			AccessJwt:  sess.RefreshToken,
-			RefreshJwt: sess.RefreshToken,
-		},
-	}
-	resp, err := comatproto.ServerRefreshSession(ctx, &client)
-	if err != nil {
-		// TODO: if failure, try creating a new session from password (2fa tokens are only valid once, so not reused)
-		fmt.Println("trying to refresh auth from password...")
-		as, err := refreshAuthSession(ctx, sess.DID.AtIdentifier(), sess.Password, sess.PDS, "")
-		if err != nil {
-			return nil, err
-		}
-		client.Auth.AccessJwt = as.RefreshToken
-		client.Auth.RefreshJwt = as.RefreshToken
-		resp, err = comatproto.ServerRefreshSession(ctx, &client)
-		if err != nil {
-			return nil, err
-		}
-	}
-	client.Auth.AccessJwt = resp.AccessJwt
-	client.Auth.RefreshJwt = resp.RefreshJwt
-
-	return &client, nil
+	return &sess, nil
 }
 
-func refreshAuthSession(ctx context.Context, username syntax.AtIdentifier, password, pdsURL, authFactorToken string) (*AuthSession, error) {
-
-	var did syntax.DID
-	if pdsURL == "" {
-		dir := identity.DefaultDirectory()
-		ident, err := dir.Lookup(ctx, username)
-		if err != nil {
-			return nil, err
-		}
-
-		pdsURL = ident.PDSEndpoint()
-		if pdsURL == "" {
-			return nil, fmt.Errorf("empty PDS URL")
-		}
-		did = ident.DID
+func authRefreshCallback(ctx context.Context, data atclient.PasswordSessionData) {
+	fmt.Println("auth refresh callback")
+	sess, _ := loadAuthSessionFile()
+	if sess == nil {
+		sess = &AuthSession{}
 	}
 
-	if did == "" && username.IsDID() {
-		did, _ = username.AsDID()
-	}
+	sess.DID = data.AccountDID
+	sess.AccessToken = data.AccessToken
+	sess.RefreshToken = data.RefreshToken
+	sess.PDS = data.Host
 
-	client := xrpc.Client{
-		Host:      pdsURL,
-		UserAgent: userAgent(),
+	if err := persistAuthSession(sess); err != nil {
+		slog.Warn("failed to save refreshed auth session data", "err", err)
 	}
-	var token *string
-	if authFactorToken != "" {
-		token = &authFactorToken
-	}
-	sess, err := comatproto.ServerCreateSession(ctx, &client, &comatproto.ServerCreateSession_Input{
-		Identifier:      username.String(),
-		Password:        password,
-		AuthFactorToken: token,
-	})
+}
+
+func loadAuthClient(ctx context.Context) (*atclient.APIClient, error) {
+
+	// TODO: could also load from env var / cmd
+	sess, err := loadAuthSessionFile()
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: check account status?
-	// TODO: warn if email isn't verified?
-	// TODO: check that sess.Did matches username
-	if did == "" {
-		did, err = syntax.ParseDID(sess.Did)
-		if err != nil {
-			return nil, err
-		}
-	} else if sess.Did != did.String() {
-		return nil, fmt.Errorf("session DID didn't match expected: %s != %s", sess.Did, did)
+	// first try to resume session
+	client := atclient.ResumePasswordSession(atclient.PasswordSessionData{
+		AccessToken:  sess.AccessToken,
+		RefreshToken: sess.RefreshToken,
+		AccountDID:   sess.DID,
+		Host:         sess.PDS,
+	}, authRefreshCallback)
+
+	// check that auth is working
+	_, err = comatproto.ServerGetSession(ctx, client)
+	if nil == err {
+		return client, nil
 	}
 
-	authSession := AuthSession{
-		DID:          did,
-		Password:     password,
-		PDS:          pdsURL,
-		RefreshToken: sess.RefreshJwt,
-	}
-	if err = persistAuthSession(&authSession); err != nil {
-		return nil, err
-	}
-	return &authSession, nil
+	// otherwise try new auth session using saved password
+	dir := identity.DefaultDirectory()
+	return atclient.LoginWithPassword(ctx, dir, sess.DID.AtIdentifier(), sess.Password, "", authRefreshCallback)
 }
 
 func wipeAuthSession() error {
