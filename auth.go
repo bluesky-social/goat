@@ -114,7 +114,7 @@ func wipeAuthSession() error {
 
 	fPath, err := xdg.SearchStateFile("goat/auth-session.json")
 	if err != nil {
-		fmt.Printf("no auth session found (already logged out)")
+		fmt.Printf("no auth session found (already logged out)\n")
 		return nil
 	}
 	return os.Remove(fPath)
