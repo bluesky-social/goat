@@ -166,6 +166,78 @@ A minimal bsky posting interface, requires account login:
 $ goat bsky post "hello from goat"
 ```
 
+## Lexicon Development
+
+In a project directory, download some existing schemas, which will get saved as JSON files in `./lexicons/`:
+
+```
+$ goat lex pull com.atproto.repo.strongRef com.atproto.moderation. app.bsky.actor.profile
+ 🟢 com.atproto.repo.strongRef
+ 🟢 com.atproto.moderation.defs
+ 🟢 com.atproto.moderation.createReport
+ 🟢 app.bsky.actor.profile
+```
+
+Create a new record schema and edit it:
+
+```
+$ goat lex new record dev.project.thing
+
+$ $EDITOR ./lexicons/dev/project/thing.json
+```
+
+Lint all local lexicons:
+
+```
+$ goat lex lint
+ 🟢 lexicons/app/bsky/actor/profile.json
+ 🟢 lexicons/com/atproto/moderation/createReport.json
+ 🟢 lexicons/com/atproto/moderation/defs.json
+ 🟢 lexicons/com/atproto/repo/strongRef.json
+ 🟡 lexicons/dev/project/thing.json
+    [missing-primary-description]: primary type missing a description
+```
+
+Check for differences against the live network, both for local edits or remote changes:
+
+```
+$ goat lex status
+```
+
+If you edited an existing schema, check schema evolution rules against the published version:
+
+```
+$ goat lex breaking
+ 🟡 app.bsky.actor.profile
+    [object-required]: required fields change (main)
+ 🟢 com.atproto.repo.strongRef
+```
+
+Check DNS configuration before publishing to new Lexicon namespaces:
+
+```
+$ goat lex check-dns
+Some lexicon NSIDs did not resolve via DNS:
+
+    dev.project.*
+
+To make these resolve, add DNS TXT entries like:
+
+    _lexicon.project.dev	TXT	"did=did:web:lex.example.com"
+
+(substituting your account DID for the example value)
+
+Note that DNS management interfaces commonly require only the sub-domain parts of a name, not the full registered domain.
+```
+
+When ready, publish new or updated Lexicons:
+
+```
+# login with 'goat account login', or provide env vars (GOAT_USERNAME="user.example.com" and GOAT_PASSWORD="...")
+$ goat lex publish
+ 🟢 dev.project.thing
+```
+
 ## License
 
 This project is dual-licensed under MIT and Apache 2.0 terms:
