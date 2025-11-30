@@ -31,13 +31,13 @@ var cmdLexPublish = &cli.Command{
 		&cli.StringFlag{
 			Name:    "username",
 			Usage:   "account identifier (handle or DID) for login",
-			Sources: cli.EnvVars("GLOT_USERNAME", "ATP_USERNAME"),
+			Sources: cli.EnvVars("GOAT_USERNAME", "ATP_USERNAME", "ATP_AUTH_USERNAME"),
 		},
 		&cli.StringFlag{
 			Name:    "password",
 			Aliases: []string{"p"},
 			Usage:   "account password (app password) for login",
-			Sources: cli.EnvVars("GLOT_PASSWORD", "ATP_PASSWORD", "PASSWORD"),
+			Sources: cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 		},
 		&cli.BoolFlag{
 			Name:  "skip-dns-check",
@@ -62,21 +62,11 @@ publish behavior:
 */
 func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 
-	user := cmd.String("username")
-	pass := cmd.String("password")
-	if user == "" || pass == "" {
-		return fmt.Errorf("requires account credentials")
-	}
-	atid, err := syntax.ParseAtIdentifier(user)
-	if err != nil {
-		return fmt.Errorf("invalid AT account identifier %s: %w", user, err)
-	}
-
-	cdir := identity.DefaultDirectory()
-	c, err := atclient.LoginWithPassword(ctx, cdir, *atid, pass, "", nil)
+	c, err := loginOrLoadAuthClient(ctx, cmd)
 	if err != nil {
 		return nil
 	}
+
 	if c.AccountDID == nil {
 		return fmt.Errorf("require API client to have DID configured")
 	}

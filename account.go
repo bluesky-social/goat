@@ -31,14 +31,14 @@ var cmdAccount = &cli.Command{
 					Aliases:  []string{"u"},
 					Required: true,
 					Usage:    "account identifier (handle or DID)",
-					Sources:  cli.EnvVars("ATP_AUTH_USERNAME"),
+					Sources:  cli.EnvVars("GOAT_USERNAME", "ATP_USERNAME", "ATP_AUTH_USERNAME"),
 				},
 				&cli.StringFlag{
 					Name:     "app-password",
 					Aliases:  []string{"p"},
 					Required: true,
 					Usage:    "password (app password recommended)",
-					Sources:  cli.EnvVars("ATP_AUTH_PASSWORD"),
+					Sources:  cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 				},
 				&cli.StringFlag{
 					Name:    "auth-factor-token",

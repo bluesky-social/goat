@@ -7,7 +7,6 @@ import (
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -23,13 +22,13 @@ var cmdLexUnpublish = &cli.Command{
 			Name:    "username",
 			Aliases: []string{"u"},
 			Usage:   "account identifier (handle or DID) for login",
-			Sources: cli.EnvVars("GLOT_USERNAME", "ATP_USERNAME"),
+			Sources: cli.EnvVars("GOAT_USERNAME", "ATP_USERNAME", "ATP_AUTH_USERNAME"),
 		},
 		&cli.StringFlag{
 			Name:    "password",
 			Aliases: []string{"p"},
 			Usage:   "account password (app password) for login",
-			Sources: cli.EnvVars("GLOT_PASSWORD", "ATP_PASSWORD", "PASSWORD"),
+			Sources: cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 		},
 	},
 	Action: runLexUnpublish,
@@ -41,21 +40,11 @@ func runLexUnpublish(ctx context.Context, cmd *cli.Command) error {
 		cli.ShowSubcommandHelpAndExit(cmd, 1)
 	}
 
-	user := cmd.String("username")
-	pass := cmd.String("password")
-	if user == "" || pass == "" {
-		return fmt.Errorf("requires account credentials")
-	}
-	atid, err := syntax.ParseAtIdentifier(user)
-	if err != nil {
-		return fmt.Errorf("invalid AT account identifier %s: %w", user, err)
-	}
-
-	cdir := identity.DefaultDirectory()
-	c, err := atclient.LoginWithPassword(ctx, cdir, *atid, pass, "", nil)
+	c, err := loginOrLoadAuthClient(ctx, cmd)
 	if err != nil {
 		return nil
 	}
+
 	if c.AccountDID == nil {
 		return fmt.Errorf("require API client to have DID configured")
 	}

@@ -14,6 +14,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/adrg/xdg"
+	"github.com/urfave/cli/v3"
 )
 
 var ErrNoAuthSession = errors.New("no auth session found")
@@ -83,9 +84,26 @@ func authRefreshCallback(ctx context.Context, data atclient.PasswordSessionData)
 	}
 }
 
+func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.APIClient, error) {
+
+	// if user/pass provided in env vars, login as emphemeral session with those
+	username := cmd.String("username")
+	password := cmd.String("password")
+	if username != "" && password != "" {
+		dir := identity.DefaultDirectory()
+		atid, err := syntax.ParseAtIdentifier(username)
+		if err != nil {
+			return nil, err
+		}
+		return atclient.LoginWithPassword(ctx, dir, *atid, password, "", nil)
+	}
+
+	// otherwise try loading from disk
+	return loadAuthClient(ctx)
+}
+
 func loadAuthClient(ctx context.Context) (*atclient.APIClient, error) {
 
-	// TODO: could also load from env var / cmd
 	sess, err := loadAuthSessionFile()
 	if err != nil {
 		return nil, err
