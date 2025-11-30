@@ -21,6 +21,7 @@ src/build/
 test-coverage.out
 dist/
 scratch/
+lexicons/
 
 # executables
 /goat
