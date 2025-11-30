@@ -11,8 +11,8 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"github.com/bluesky-social/indigo/xrpc"
 
 	"github.com/urfave/cli/v3"
 )
@@ -65,7 +65,8 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	} else if err != nil {
 		return err
 	}
-	did := oldClient.Auth.Did
+	did := *oldClient.AccountDID
+	didStr := did.String()
 
 	newHostURL := cmd.String("pds-host")
 	if !strings.Contains(newHostURL, "://") {
@@ -81,13 +82,11 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	inviteCode := cmd.String("invite-code")
 	newEmail := cmd.String("new-email")
 
-	newClient := xrpc.Client{
-		Host:      newHostURL,
-		UserAgent: userAgent(),
-	}
+	newClient := atclient.NewAPIClient(newHostURL)
+	newClient.Headers.Set("User-Agent", userAgentString())
 
 	// connect to new host to discover service DID
-	newHostDesc, err := comatproto.ServerDescribeServer(ctx, &newClient)
+	newHostDesc, err := comatproto.ServerDescribeServer(ctx, newClient)
 	if err != nil {
 		return fmt.Errorf("failed connecting to new host: %w", err)
 	}
@@ -110,7 +109,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 
 	// then create the new account
 	createParams := comatproto.ServerCreateAccount_Input{
-		Did:      &did,
+		Did:      &didStr,
 		Handle:   newHandle,
 		Password: &newPassword,
 	}
@@ -122,44 +121,52 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// use service auth for access token, temporarily
-	newClient.Auth = &xrpc.AuthInfo{
-		Did:        did,
-		Handle:     newHandle,
-		AccessJwt:  createAuthResp.Token,
-		RefreshJwt: createAuthResp.Token,
+	newClient.AccountDID = &did
+	newClient.Auth = &atclient.PasswordAuth{
+		Session: atclient.PasswordSessionData{
+			AccountDID:  did,
+			AccessToken: createAuthResp.Token,
+		},
 	}
-	createAccountResp, err := comatproto.ServerCreateAccount(ctx, &newClient, &createParams)
+	createAccountResp, err := comatproto.ServerCreateAccount(ctx, newClient, &createParams)
 	if err != nil {
 		return fmt.Errorf("failed creating new account: %w", err)
 	}
 
-	if createAccountResp.Did != did {
+	if createAccountResp.Did != did.String() {
 		return fmt.Errorf("new account DID not a match: %s != %s", createAccountResp.Did, did)
 	}
-	newClient.Auth.AccessJwt = createAccountResp.AccessJwt
-	newClient.Auth.RefreshJwt = createAccountResp.RefreshJwt
+	newClient.Auth = &atclient.PasswordAuth{
+		Session: atclient.PasswordSessionData{
+			AccountDID:   did,
+			AccessToken:  createAccountResp.AccessJwt,
+			RefreshToken: createAccountResp.RefreshJwt,
+		},
+	}
 
 	// login client on the new host
-	sess, err := comatproto.ServerCreateSession(ctx, &newClient, &comatproto.ServerCreateSession_Input{
-		Identifier: did,
+	sess, err := comatproto.ServerCreateSession(ctx, newClient, &comatproto.ServerCreateSession_Input{
+		Identifier: did.String(),
 		Password:   newPassword,
 	})
 	if err != nil {
 		return fmt.Errorf("failed login to newly created account on new host: %w", err)
 	}
-	newClient.Auth = &xrpc.AuthInfo{
-		Did:        did,
-		AccessJwt:  sess.AccessJwt,
-		RefreshJwt: sess.RefreshJwt,
+	newClient.Auth = &atclient.PasswordAuth{
+		Session: atclient.PasswordSessionData{
+			AccountDID:   did,
+			AccessToken:  sess.AccessJwt,
+			RefreshToken: sess.RefreshJwt,
+		},
 	}
 
 	// 2. Migrate Data
 	slog.Info("migrating repo")
-	repoBytes, err := comatproto.SyncGetRepo(ctx, oldClient, did, "")
+	repoBytes, err := comatproto.SyncGetRepo(ctx, oldClient, did.String(), "")
 	if err != nil {
 		return fmt.Errorf("failed exporting repo: %w", err)
 	}
-	err = comatproto.RepoImportRepo(ctx, &newClient, bytes.NewReader(repoBytes))
+	err = comatproto.RepoImportRepo(ctx, newClient, bytes.NewReader(repoBytes))
 	if err != nil {
 		return fmt.Errorf("failed importing repo: %w", err)
 	}
@@ -170,7 +177,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("failed fetching old preferences: %w", err)
 	}
-	err = agnostic.ActorPutPreferences(ctx, &newClient, &agnostic.ActorPutPreferences_Input{
+	err = agnostic.ActorPutPreferences(ctx, newClient, &agnostic.ActorPutPreferences_Input{
 		Preferences: prefResp.Preferences,
 	})
 	if err != nil {
@@ -180,17 +187,17 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	slog.Info("migrating blobs")
 	blobCursor := ""
 	for {
-		listResp, err := comatproto.SyncListBlobs(ctx, oldClient, blobCursor, did, 100, "")
+		listResp, err := comatproto.SyncListBlobs(ctx, oldClient, blobCursor, did.String(), 100, "")
 		if err != nil {
 			return fmt.Errorf("failed listing blobs: %w", err)
 		}
 		for _, blobCID := range listResp.Cids {
-			blobBytes, err := comatproto.SyncGetBlob(ctx, oldClient, blobCID, did)
+			blobBytes, err := comatproto.SyncGetBlob(ctx, oldClient, blobCID, did.String())
 			if err != nil {
 				slog.Warn("failed downloading blob", "cid", blobCID, "err", err)
 				continue
 			}
-			_, err = comatproto.RepoUploadBlob(ctx, &newClient, bytes.NewReader(blobBytes))
+			_, err = comatproto.RepoUploadBlob(ctx, newClient, bytes.NewReader(blobBytes))
 			if err != nil {
 				slog.Warn("failed uploading blob", "cid", blobCID, "err", err, "size", len(blobBytes))
 			}
@@ -204,7 +211,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 
 	// display migration status
 	// NOTE: this could check between the old PDS and new PDS, polling in a loop showing progress until all records have been indexed
-	statusResp, err := comatproto.ServerCheckAccountStatus(ctx, &newClient)
+	statusResp, err := comatproto.ServerCheckAccountStatus(ctx, newClient)
 	if err != nil {
 		return fmt.Errorf("failed checking account status: %w", err)
 	}
@@ -214,7 +221,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	// NOTE: to work with did:web or non-PDS-managed did:plc, need to do manual migraiton process
 	slog.Info("updating identity to new host")
 
-	credsResp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, &newClient)
+	credsResp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, newClient)
 	if err != nil {
 		return fmt.Errorf("failed fetching new credentials: %w", err)
 	}
@@ -236,7 +243,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed requesting PLC operation signature: %w", err)
 	}
 
-	err = agnostic.IdentitySubmitPlcOperation(ctx, &newClient, &agnostic.IdentitySubmitPlcOperation_Input{
+	err = agnostic.IdentitySubmitPlcOperation(ctx, newClient, &agnostic.IdentitySubmitPlcOperation_Input{
 		Operation: signedPlcOpResp.Operation,
 	})
 	if err != nil {
@@ -246,7 +253,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	// 4. Finalize Migration
 	slog.Info("activating new account")
 
-	err = comatproto.ServerActivateAccount(ctx, &newClient)
+	err = comatproto.ServerActivateAccount(ctx, newClient)
 	if err != nil {
 		return fmt.Errorf("failed activating new host: %w", err)
 	}

@@ -122,7 +122,7 @@ func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("require at least one path to publish")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -152,9 +152,9 @@ func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 		}
 		nsidStr := nsid.String()
 
-		resp, err := agnostic.RepoPutRecord(ctx, xrpcc, &agnostic.RepoPutRecord_Input{
+		resp, err := agnostic.RepoPutRecord(ctx, client, &agnostic.RepoPutRecord_Input{
 			Collection: "com.atproto.lexicon.schema",
-			Repo:       xrpcc.Auth.Did,
+			Repo:       client.AccountDID.String(),
 			Record:     recordVal,
 			Rkey:       nsidStr,
 			Validate:   &validateFlag,

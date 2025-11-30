@@ -33,7 +33,7 @@ func runBskyPost(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide post text as argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -44,9 +44,9 @@ func runBskyPost(ctx context.Context, cmd *cli.Command) error {
 		Text:      text,
 		CreatedAt: syntax.DatetimeNow().String(),
 	}
-	resp, err := comatproto.RepoCreateRecord(ctx, xrpcc, &comatproto.RepoCreateRecord_Input{
+	resp, err := comatproto.RepoCreateRecord(ctx, client, &comatproto.RepoCreateRecord_Input{
 		Collection: "app.bsky.feed.post",
-		Repo:       xrpcc.Auth.Did,
+		Repo:       client.AccountDID.String(),
 		Record:     &lexutil.LexiconTypeDecoder{Val: &post},
 	})
 	if err != nil {

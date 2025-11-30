@@ -303,7 +303,7 @@ func runPLCDump(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", *userAgent())
+	req.Header.Set("User-Agent", userAgentString())
 	q := req.URL.Query()
 	q.Add("count", fmt.Sprintf("%d", size))
 	req.URL.RawQuery = q.Encode()
@@ -608,7 +608,7 @@ func runPLCSubmit(ctx context.Context, cmd *cli.Command) error {
 
 	c := didplc.Client{
 		DirectoryURL: cmd.String("plc-host"),
-		UserAgent:    *userAgent(),
+		UserAgent:    userAgentString(),
 	}
 
 	if err = c.Submit(ctx, didString, op); err != nil {
@@ -675,7 +675,7 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	c := didplc.Client{
 		DirectoryURL: cmd.String("plc-host"),
-		UserAgent:    *userAgent(),
+		UserAgent:    userAgentString(),
 	}
 	op, err := fetchOpForUpdate(ctx, c, didString, prevCID)
 	if err != nil {

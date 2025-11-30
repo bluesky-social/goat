@@ -8,7 +8,7 @@ import (
 	"os"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
-	"github.com/bluesky-social/indigo/xrpc"
+	"github.com/bluesky-social/indigo/atproto/atclient"
 
 	"github.com/urfave/cli/v3"
 )
@@ -80,15 +80,13 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	if pdsHost == "" {
 		pdsHost = ident.PDSEndpoint()
 	}
-
-	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      pdsHost,
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
+	if pdsHost == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
 	}
+
+	// create a new API client to connect to the account's PDS
+	client := atclient.NewAPIClient(pdsHost)
+	client.Headers.Set("User-Agent", userAgentString())
 
 	topDir := cmd.String("output")
 	if topDir == "" {
@@ -100,7 +98,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		resp, err := comatproto.SyncListBlobs(ctx, &xrpcc, cursor, ident.DID.String(), 500, "")
+		resp, err := comatproto.SyncListBlobs(ctx, client, cursor, ident.DID.String(), 500, "")
 		if err != nil {
 			return err
 		}
@@ -110,7 +108,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 				fmt.Printf("%s\texists\n", blobPath)
 				continue
 			}
-			blobBytes, err := comatproto.SyncGetBlob(ctx, &xrpcc, cidStr, ident.DID.String())
+			blobBytes, err := comatproto.SyncGetBlob(ctx, client, cidStr, ident.DID.String())
 			if err != nil {
 				fmt.Printf("%s\tfailed %s\n", blobPath, err)
 				continue
@@ -140,17 +138,12 @@ func runBlobList(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      ident.PDSEndpoint(),
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
-		return fmt.Errorf("no PDS endpoint for identity")
-	}
+	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client.Headers.Set("User-Agent", userAgentString())
 
 	cursor := ""
 	for {
-		resp, err := comatproto.SyncListBlobs(ctx, &xrpcc, cursor, ident.DID.String(), 500, "")
+		resp, err := comatproto.SyncListBlobs(ctx, client, cursor, ident.DID.String(), 500, "")
 		if err != nil {
 			return err
 		}
@@ -181,13 +174,8 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// create a new API client to connect to the account's PDS
-	xrpcc := xrpc.Client{
-		Host:      ident.PDSEndpoint(),
-		UserAgent: userAgent(),
-	}
-	if xrpcc.Host == "" {
-		return fmt.Errorf("no PDS endpoint for identity")
-	}
+	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client.Headers.Set("User-Agent", userAgentString())
 
 	blobPath := cmd.String("output")
 	if blobPath == "" {
@@ -199,7 +187,7 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 	if _, err := os.Stat(blobPath); err == nil {
 		return fmt.Errorf("file exists: %s", blobPath)
 	}
-	blobBytes, err := comatproto.SyncGetBlob(ctx, &xrpcc, blobCID, ident.DID.String())
+	blobBytes, err := comatproto.SyncGetBlob(ctx, client, blobCID, ident.DID.String())
 	if err != nil {
 		return err
 	}
@@ -212,7 +200,7 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -224,7 +212,7 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	resp, err := comatproto.RepoUploadBlob(ctx, xrpcc, bytes.NewReader(fileBytes))
+	resp, err := comatproto.RepoUploadBlob(ctx, client, bytes.NewReader(fileBytes))
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
-	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/did-method-plc/go-didplc"
 
 	"github.com/urfave/cli/v3"
@@ -82,14 +81,14 @@ var cmdAccountPlc = &cli.Command{
 
 func runAccountPlcRecommended(ctx context.Context, cmd *cli.Command) error {
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
 	}
 
-	resp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, xrpcc)
+	resp, err := agnostic.IdentityGetRecommendedDidCredentials(ctx, client)
 	if err != nil {
 		return err
 	}
@@ -105,14 +104,14 @@ func runAccountPlcRecommended(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountPlcRequestToken(ctx context.Context, cmd *cli.Command) error {
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
 	}
 
-	err = comatproto.IdentityRequestPlcOperationSignature(ctx, xrpcc)
+	err = comatproto.IdentityRequestPlcOperationSignature(ctx, client)
 	if err != nil {
 		return err
 	}
@@ -128,7 +127,7 @@ func runAccountPlcSign(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide JSON file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -150,7 +149,7 @@ func runAccountPlcSign(ctx context.Context, cmd *cli.Command) error {
 		body.Token = &token
 	}
 
-	resp, err := agnostic.IdentitySignPlcOperation(ctx, xrpcc, &body)
+	resp, err := agnostic.IdentitySignPlcOperation(ctx, client, &body)
 	if err != nil {
 		return err
 	}
@@ -171,7 +170,7 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide JSON file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -203,7 +202,7 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	rawMsg := json.RawMessage(opEncoded)
-	err = agnostic.IdentitySubmitPlcOperation(ctx, xrpcc, &agnostic.IdentitySubmitPlcOperation_Input{
+	err = agnostic.IdentitySubmitPlcOperation(ctx, client, &agnostic.IdentitySubmitPlcOperation_Input{
 		Operation: &rawMsg,
 	})
 
@@ -216,19 +215,14 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountPlcCurrent(ctx context.Context, cmd *cli.Command) error {
 
-	xrpcc, err := loadAuthClient(ctx)
-	if err == ErrNoAuthSession || xrpcc.Auth == nil {
+	client, err := loadAuthClient(ctx)
+	if err == ErrNoAuthSession || client.Auth == nil {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
 	}
 
-	did, err := syntax.ParseDID(xrpcc.Auth.Did)
-	if err != nil {
-		return err
-	}
-
-	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), did)
+	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), *client.AccountDID)
 	if err != nil {
 		return err
 	}
@@ -254,20 +248,15 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
 	}
 
-	did, err := syntax.ParseDID(xrpcc.Auth.Did)
-	if err != nil {
-		return err
-	}
-
 	// 1. fetch current PLC op: plc.directory/{did}/data
-	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), did)
+	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), *client.AccountDID)
 	if err != nil {
 		return err
 	}
@@ -304,13 +293,13 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 		body.Token = &token
 	}
 
-	resp, err := agnostic.IdentitySignPlcOperation(ctx, xrpcc, &body)
+	resp, err := agnostic.IdentitySignPlcOperation(ctx, client, &body)
 	if err != nil {
 		return err
 	}
 
 	// 4. submit signed op
-	err = agnostic.IdentitySubmitPlcOperation(ctx, xrpcc, &agnostic.IdentitySubmitPlcOperation_Input{
+	err = agnostic.IdentitySubmitPlcOperation(ctx, client, &agnostic.IdentitySubmitPlcOperation_Input{
 		Operation: resp.Operation,
 	})
 	if err != nil {

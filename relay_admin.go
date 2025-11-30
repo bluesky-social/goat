@@ -178,7 +178,7 @@ func (c *RelayAdminClient) Do(method, path string, params map[string]string, bod
 	} else if c.BearerToken != "" {
 		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	}
-	req.Header.Set("User-Agent", *userAgent())
+	req.Header.Set("User-Agent", userAgentString())
 	if buf != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

@@ -32,7 +32,7 @@ var cmdBskyPrefs = &cli.Command{
 
 func runBskyPrefsExport(ctx context.Context, cmd *cli.Command) error {
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -40,7 +40,7 @@ func runBskyPrefsExport(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// TODO: does indigo API code crash with unsupported preference '$type'? Eg "Lexicon decoder" with unsupported type.
-	resp, err := agnostic.ActorGetPreferences(ctx, xrpcc)
+	resp, err := agnostic.ActorGetPreferences(ctx, client)
 	if err != nil {
 		return fmt.Errorf("failed fetching old preferences: %w", err)
 	}
@@ -60,7 +60,7 @@ func runBskyPrefsImport(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -77,7 +77,7 @@ func runBskyPrefsImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = agnostic.ActorPutPreferences(ctx, xrpcc, &agnostic.ActorPutPreferences_Input{
+	err = agnostic.ActorPutPreferences(ctx, client, &agnostic.ActorPutPreferences_Input{
 		Preferences: prefsArray,
 	})
 	if err != nil {

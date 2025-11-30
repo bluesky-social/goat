@@ -205,7 +205,7 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -238,9 +238,9 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 	}
 	validate := !cmd.Bool("no-validate")
 
-	resp, err := agnostic.RepoCreateRecord(ctx, xrpcc, &agnostic.RepoCreateRecord_Input{
+	resp, err := agnostic.RepoCreateRecord(ctx, client, &agnostic.RepoCreateRecord_Input{
 		Collection: nsid,
-		Repo:       xrpcc.Auth.Did,
+		Repo:       client.AccountDID.String(),
 		Record:     recordVal,
 		Rkey:       rkey,
 		Validate:   &validate,
@@ -259,7 +259,7 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -284,16 +284,16 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 	rkey := cmd.String("rkey")
 
 	// NOTE: need to fetch existing record CID to perform swap. this is optional in theory, but golang can't deal with "optional" and "nullable", so we always need to set this (?)
-	existing, err := agnostic.RepoGetRecord(ctx, xrpcc, "", nsid, xrpcc.Auth.Did, rkey)
+	existing, err := agnostic.RepoGetRecord(ctx, client, "", nsid, client.AccountDID.String(), rkey)
 	if err != nil {
 		return err
 	}
 
 	validate := !cmd.Bool("no-validate")
 
-	resp, err := agnostic.RepoPutRecord(ctx, xrpcc, &agnostic.RepoPutRecord_Input{
+	resp, err := agnostic.RepoPutRecord(ctx, client, &agnostic.RepoPutRecord_Input{
 		Collection: nsid,
-		Repo:       xrpcc.Auth.Did,
+		Repo:       client.AccountDID.String(),
 		Record:     recordVal,
 		Rkey:       rkey,
 		Validate:   &validate,
@@ -309,7 +309,7 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func runRecordDelete(ctx context.Context, cmd *cli.Command) error {
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -325,9 +325,9 @@ func runRecordDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	_, err = comatproto.RepoDeleteRecord(ctx, xrpcc, &comatproto.RepoDeleteRecord_Input{
+	_, err = comatproto.RepoDeleteRecord(ctx, client, &comatproto.RepoDeleteRecord_Input{
 		Collection: collection.String(),
-		Repo:       xrpcc.Auth.Did,
+		Repo:       client.AccountDID.String(),
 		Rkey:       rkey.String(),
 	})
 	if err != nil {

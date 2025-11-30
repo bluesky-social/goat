@@ -102,7 +102,7 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 		SkipHandleVerification: true,
 		TryAuthoritativeDNS:    false,
 		SkipDNSDomainSuffixes:  []string{".bsky.social"},
-		UserAgent:              *userAgent(),
+		UserAgent:              userAgentString(),
 	}
 	cdir := identity.NewCacheDirectory(&bdir, 1_000_000, time.Hour*24, time.Minute*2, time.Minute*5)
 
@@ -151,7 +151,7 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 	}
 	urlString := u.String()
 	con, _, err := dialer.Dial(urlString, http.Header{
-		"User-Agent": []string{*userAgent()},
+		"User-Agent": []string{userAgentString()},
 	})
 	if err != nil {
 		return fmt.Errorf("subscribing to firehose failed (dialing): %w", err)

@@ -149,7 +149,7 @@ func runRepoImport(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide CAR file path as an argument")
 	}
 
-	xrpcc, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -161,7 +161,7 @@ func runRepoImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = comatproto.RepoImportRepo(ctx, xrpcc, bytes.NewReader(fileBytes))
+	err = comatproto.RepoImportRepo(ctx, client, bytes.NewReader(fileBytes))
 	if err != nil {
 		return fmt.Errorf("failed to import repo: %w", err)
 	}
