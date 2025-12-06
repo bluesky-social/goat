@@ -7,8 +7,6 @@ github.com/benbjohnson/clock v1.3.5 h1:VvXlSJBzZpA/zum6Sj74hxwYI2DIxRWuNIoXAzHZz
 github.com/benbjohnson/clock v1.3.5/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
-github.com/bluesky-social/indigo v0.0.0-20251130204406-393d8bdaba2e h1:U/1MyJ99yXtOGjQPGT7q9qGi7+tRm+0CX2hMLiNa93g=
-github.com/bluesky-social/indigo v0.0.0-20251130204406-393d8bdaba2e/go.mod h1:Pm2I1+iDXn/hLbF7XCg/DsZi6uDCiOo7hZGWprSM7k0=
 github.com/bluesky-social/indigo v0.0.0-20251206005924-d49b45419635 h1:kNeRrgGJH2g5OvjLqtaQ744YXqduliZYpFkJ/ld47c0=
 github.com/bluesky-social/indigo v0.0.0-20251206005924-d49b45419635/go.mod h1:Pm2I1+iDXn/hLbF7XCg/DsZi6uDCiOo7hZGWprSM7k0=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
