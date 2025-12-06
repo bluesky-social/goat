@@ -38,7 +38,7 @@ var cmdAccount = &cli.Command{
 				&cli.StringFlag{
 					Name:     "app-password",
 					Aliases:  []string{"p"},
-					Required: true,
+					Required: false,
 					Usage:    "password (app password recommended)",
 					Sources:  cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 				},
