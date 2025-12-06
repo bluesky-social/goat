@@ -1,27 +1,23 @@
 `goat`: Go AT protocol CLI tool
 ===============================
 
-This is a re-implementation of [adenosine-cli](https://gitlab.com/bnewbold/adenosine/-/tree/main/adenosine-cli?ref_type=heads) in golang.
-
+This is a general purpose [atproto](https://atproto.com) CLI tool, sort of like `curl`. You can fetch `at://` URIs, monitor the full-network firehose, migrate accounts, administer PDS instances, and more.
 
 ## Install
+
+If you use [homebrew](https://formulae.brew.sh/formula/goat), you can install directly:
+
+```bash
+brew install goat
+```
+
+Pre-built binaries and Debian/Ubuntu packages are available under [Releases](https://github.com/bluesky-social/goat/releases/tag/v0.2.0).
 
 If you have the Go toolchain installed and configured correctly, you can directly build and install the tool for your local account:
 
 ```bash
 go install github.com/bluesky-social/goat@latest
 ```
-
-A more manual way to install is:
-
-```bash
-git clone https://github.com/bluesky-social/goat
-go build .
-sudo cp goat /usr/local/bin
-```
-
-The intention is to also provide a Homebrew "cask" and Debian/Ubuntu packages.
-
 
 ## Usage
 
