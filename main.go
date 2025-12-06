@@ -11,6 +11,9 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// this can be set at build time with: -ldflags="-X 'main.Version=X.Y.Z'"
+var Version string
+
 func main() {
 	if err := run(os.Args); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -20,10 +23,15 @@ func main() {
 
 func run(args []string) error {
 
+	cmdVersion := versioninfo.Short()
+	if Version != "" {
+		cmdVersion = Version
+	}
+
 	app := cli.Command{
 		Name:    "goat",
 		Usage:   "Go AT protocol CLI tool",
-		Version: versioninfo.Short(),
+		Version: cmdVersion,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "log-level",
