@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"syscall"
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
@@ -13,6 +14,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/auth"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"golang.org/x/term"
 
 	"github.com/urfave/cli/v3"
 )
@@ -205,6 +207,15 @@ type Credentials struct {
 func resolveCredentials(cmd *cli.Command) (Credentials, error) {
 	appPassword := cmd.String("app-password")
 	token := cmd.String("auth-factor-token")
+
+	if appPassword == "" {
+		fmt.Print("Password: ")
+		bytepw, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return Credentials{}, err
+		}
+		appPassword = string(bytepw)
+	}
 
 	return Credentials{AppPassword: appPassword, AuthFactorToken: token}, nil
 }
