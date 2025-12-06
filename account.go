@@ -197,21 +197,34 @@ var cmdAccount = &cli.Command{
 	},
 }
 
+type Credentials struct {
+	AppPassword     string
+	AuthFactorToken string
+}
+
+func resolveCredentials(cmd *cli.Command) (Credentials, error) {
+	appPassword := cmd.String("app-password")
+	token := cmd.String("auth-factor-token")
+
+	return Credentials{AppPassword: appPassword, AuthFactorToken: token}, nil
+}
+
 func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
 	var client *atclient.APIClient
 	var err error
 
 	pdsHost := cmd.String("pds-host")
+	credentials, err := resolveCredentials(cmd)
 	if pdsHost != "" {
-		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), credentials.AppPassword, credentials.AuthFactorToken, authRefreshCallback)
 	} else {
 		username, err := syntax.ParseAtIdentifier(cmd.String("username"))
 		if err != nil {
 			return err
 		}
 		dir := identity.DefaultDirectory()
-		client, err = atclient.LoginWithPassword(ctx, dir, *username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPassword(ctx, dir, *username, credentials.AppPassword, credentials.AuthFactorToken, authRefreshCallback)
 	}
 	if err != nil {
 		return err
