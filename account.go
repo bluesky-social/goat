@@ -208,6 +208,8 @@ func resolveCredentials(cmd *cli.Command) (Credentials, error) {
 	appPassword := cmd.String("app-password")
 	token := cmd.String("auth-factor-token")
 
+	passwordPrompted := false
+
 	if appPassword == "" {
 		fmt.Print("Password: ")
 		bytepw, err := term.ReadPassword(int(syscall.Stdin))
@@ -215,6 +217,21 @@ func resolveCredentials(cmd *cli.Command) (Credentials, error) {
 			return Credentials{}, err
 		}
 		appPassword = string(bytepw)
+
+		passwordPrompted = true
+	}
+
+	if token == "" {
+		prompt := "2FA token (optional): "
+		if passwordPrompted {
+			prompt = "\n" + prompt
+		}
+		fmt.Print(prompt)
+		bytetoken, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return Credentials{}, err
+		}
+		token = string(bytetoken)
 	}
 
 	return Credentials{AppPassword: appPassword, AuthFactorToken: token}, nil
