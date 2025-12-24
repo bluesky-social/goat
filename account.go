@@ -217,6 +217,11 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	// defensive check: the above should never return a nil client
+	if client == nil || client.Auth == nil {
+		return fmt.Errorf("login failed")
+	}
+
 	passAuth, ok := client.Auth.(*atclient.PasswordAuth)
 	if !ok {
 		return fmt.Errorf("expected password auth")
