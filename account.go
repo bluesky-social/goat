@@ -201,12 +201,13 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
 	var client *atclient.APIClient
 	var err error
+	var username *syntax.AtIdentifier
 
 	pdsHost := cmd.String("pds-host")
 	if pdsHost != "" {
 		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
 	} else {
-		username, err := syntax.ParseAtIdentifier(cmd.String("username"))
+		username, err = syntax.ParseAtIdentifier(cmd.String("username"))
 		if err != nil {
 			return err
 		}
