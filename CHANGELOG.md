@@ -6,10 +6,15 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## UNRELEASED
 
+
 ### Fixed
 
 - resolved a panic with failed account login attempts
 
+### Changed
+
+- updated indigo SDK dependency
+- consistent use of HTTP proxy env vars (via indigo SDK change)
 
 ## [0.2.1] - 2025-12-05
 
