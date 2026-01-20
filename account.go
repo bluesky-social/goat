@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"syscall"
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
@@ -13,6 +14,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/auth"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"golang.org/x/term"
 
 	"github.com/urfave/cli/v3"
 )
@@ -36,7 +38,7 @@ var cmdAccount = &cli.Command{
 				&cli.StringFlag{
 					Name:     "app-password",
 					Aliases:  []string{"p"},
-					Required: true,
+					Required: false,
 					Usage:    "password (app password recommended)",
 					Sources:  cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 				},
@@ -197,6 +199,44 @@ var cmdAccount = &cli.Command{
 	},
 }
 
+type Credentials struct {
+	AppPassword     string
+	AuthFactorToken string
+}
+
+func resolveCredentials(cmd *cli.Command) (Credentials, error) {
+	appPassword := cmd.String("app-password")
+	token := cmd.String("auth-factor-token")
+
+	passwordPrompted := false
+
+	if appPassword == "" {
+		fmt.Print("Password: ")
+		bytepw, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return Credentials{}, err
+		}
+		appPassword = string(bytepw)
+
+		passwordPrompted = true
+	}
+
+	if token == "" {
+		prompt := "2FA token (optional): "
+		if passwordPrompted {
+			prompt = "\n" + prompt
+		}
+		fmt.Print(prompt)
+		bytetoken, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return Credentials{}, err
+		}
+		token = string(bytetoken)
+	}
+
+	return Credentials{AppPassword: appPassword, AuthFactorToken: token}, nil
+}
+
 func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
 	var client *atclient.APIClient
@@ -204,15 +244,16 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 	var username *syntax.AtIdentifier
 
 	pdsHost := cmd.String("pds-host")
+	credentials, err := resolveCredentials(cmd)
 	if pdsHost != "" {
-		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), credentials.AppPassword, credentials.AuthFactorToken, authRefreshCallback)
 	} else {
 		username, err = syntax.ParseAtIdentifier(cmd.String("username"))
 		if err != nil {
 			return err
 		}
 		dir := identity.DefaultDirectory()
-		client, err = atclient.LoginWithPassword(ctx, dir, *username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPassword(ctx, dir, *username, credentials.AppPassword, credentials.AuthFactorToken, authRefreshCallback)
 	}
 	if err != nil {
 		return err
