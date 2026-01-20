@@ -22,7 +22,7 @@ func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
 	}
 
 	dir := identity.DefaultDirectory()
-	return dir.Lookup(ctx, *id)
+	return dir.Lookup(ctx, id)
 }
 
 func resolveToDID(ctx context.Context, s string) (syntax.DID, error) {

@@ -95,7 +95,7 @@ func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.API
 		if err != nil {
 			return nil, err
 		}
-		return atclient.LoginWithPassword(ctx, dir, *atid, password, "", nil)
+		return atclient.LoginWithPassword(ctx, dir, atid, password, "", nil)
 	}
 
 	// otherwise try loading from disk

@@ -201,7 +201,7 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
 	var client *atclient.APIClient
 	var err error
-	var username *syntax.AtIdentifier
+	var username syntax.AtIdentifier
 
 	pdsHost := cmd.String("pds-host")
 	if pdsHost != "" {
@@ -212,7 +212,7 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 		dir := identity.DefaultDirectory()
-		client, err = atclient.LoginWithPassword(ctx, dir, *username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPassword(ctx, dir, username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
 	}
 	if err != nil {
 		return err
