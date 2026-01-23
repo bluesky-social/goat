@@ -16,12 +16,23 @@ import (
 )
 
 func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
+	return resolveIdentWithPLC(ctx, arg, "")
+}
+
+func resolveIdentWithPLC(ctx context.Context, arg string, plcHost string) (*identity.Identity, error) {
 	id, err := syntax.ParseAtIdentifier(arg)
 	if err != nil {
 		return nil, err
 	}
 
-	dir := identity.DefaultDirectory()
+	var dir identity.Directory
+	if plcHost != "" {
+		dir = &identity.BaseDirectory{
+			PLCURL: plcHost,
+		}
+	} else {
+		dir = identity.DefaultDirectory()
+	}
 	return dir.Lookup(ctx, id)
 }
 

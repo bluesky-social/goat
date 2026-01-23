@@ -16,7 +16,14 @@ import (
 var cmdBlob = &cli.Command{
 	Name:  "blob",
 	Usage: "commands for media files (blobs)",
-	Flags: []cli.Flag{},
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "plc-host",
+			Usage:   "method, hostname, and port of PLC registry",
+			Value:   "https://plc.directory",
+			Sources: cli.EnvVars("ATP_PLC_HOST"),
+		},
+	},
 	Commands: []*cli.Command{
 		&cli.Command{
 			Name:      "export",
@@ -71,7 +78,8 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	plcHost := cmd.String("plc-host")
+	ident, err := resolveIdentWithPLC(ctx, username, plcHost)
 	if err != nil {
 		return err
 	}
@@ -132,7 +140,8 @@ func runBlobList(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	plcHost := cmd.String("plc-host")
+	ident, err := resolveIdentWithPLC(ctx, username, plcHost)
 	if err != nil {
 		return err
 	}
@@ -168,7 +177,8 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide blob CID as second argument")
 	}
 	blobCID := cmd.Args().Get(1)
-	ident, err := resolveIdent(ctx, username)
+	plcHost := cmd.String("plc-host")
+	ident, err := resolveIdentWithPLC(ctx, username, plcHost)
 	if err != nil {
 		return err
 	}

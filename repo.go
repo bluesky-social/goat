@@ -24,7 +24,14 @@ import (
 var cmdRepo = &cli.Command{
 	Name:  "repo",
 	Usage: "commands for public atproto data repositories",
-	Flags: []cli.Flag{},
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "plc-host",
+			Usage:   "method, hostname, and port of PLC registry",
+			Value:   "https://plc.directory",
+			Sources: cli.EnvVars("ATP_PLC_HOST"),
+		},
+	},
 	Commands: []*cli.Command{
 		&cli.Command{
 			Name:      "export",
@@ -99,7 +106,8 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	plcHost := cmd.String("plc-host")
+	ident, err := resolveIdentWithPLC(ctx, username, plcHost)
 	if err != nil {
 		return err
 	}
