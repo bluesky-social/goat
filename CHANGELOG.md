@@ -10,6 +10,7 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - resolved a panic with failed account login attempts
+- login to inactive accounts is possible (eg, deactivated)
 
 ### Changed
 
