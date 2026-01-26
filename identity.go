@@ -35,7 +35,10 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	dir := identity.BaseDirectory{}
+	bdir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
 	var raw json.RawMessage
 
 	if atid.IsDID() {
@@ -47,7 +50,7 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 			fmt.Println(did)
 			return nil
 		}
-		raw, err = dir.ResolveDIDRaw(ctx, did)
+		raw, err = bdir.ResolveDIDRaw(ctx, did)
 		if err != nil {
 			return err
 		}
@@ -56,7 +59,7 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		did, err := dir.ResolveHandle(ctx, handle)
+		did, err := bdir.ResolveHandle(ctx, handle)
 		if err != nil {
 			return err
 		}
@@ -64,7 +67,7 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 			fmt.Println(did)
 			return nil
 		}
-		raw, err = dir.ResolveDIDRaw(ctx, did)
+		raw, err = bdir.ResolveDIDRaw(ctx, did)
 		if err != nil {
 			return err
 		}

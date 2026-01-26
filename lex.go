@@ -132,7 +132,10 @@ func runLexResolve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	dir := identity.BaseDirectory{}
+	dir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
 	if cmd.Bool("did") {
 		did, err := dir.ResolveNSID(ctx, nsid)
 		if err != nil {
@@ -169,7 +172,10 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	}
 	authority := nsid.Authority()
 
-	dir := identity.BaseDirectory{}
+	dir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
 	did, err := dir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return err
@@ -227,7 +233,10 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 
 	var nsid syntax.NSID
 	var recordData map[string]any
-	dir := identity.BaseDirectory{}
+	dir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
 	cat := lexicon.NewResolvingCatalog()
 
 	var flags lexicon.ValidateFlags = 0

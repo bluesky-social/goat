@@ -26,7 +26,7 @@ var cmdPLC = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "plc-host",
-			Usage:   "method, hostname, and port of PLC registry",
+			Usage:   "method, hostname, and port of PLC directory",
 			Value:   "https://plc.directory",
 			Sources: cli.EnvVars("ATP_PLC_HOST"),
 		},
@@ -177,7 +177,8 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	dir := identity.BaseDirectory{
-		PLCURL: plcHost,
+		PLCURL:    plcHost,
+		UserAgent: userAgentString(),
 	}
 
 	id, err := syntax.ParseAtIdentifier(s)
@@ -245,7 +246,8 @@ func runPLCData(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	dir := identity.BaseDirectory{
-		PLCURL: plcHost,
+		PLCURL:    plcHost,
+		UserAgent: userAgentString(),
 	}
 
 	id, err := syntax.ParseAtIdentifier(s)

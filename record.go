@@ -11,7 +11,6 @@ import (
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -111,7 +110,7 @@ var cmdRecordList = &cli.Command{
 }
 
 func runRecordGet(ctx context.Context, cmd *cli.Command) error {
-	dir := identity.DefaultDirectory()
+	dir := configDirectory(cmd.String("plc-host"))
 
 	uriArg := cmd.Args().First()
 	if uriArg == "" {
@@ -146,7 +145,7 @@ func runRecordList(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -206,7 +205,7 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path or '-' for stdin as an argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -265,7 +264,7 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -315,7 +314,7 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func runRecordDelete(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {

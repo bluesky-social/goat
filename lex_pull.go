@@ -85,7 +85,10 @@ func pullLexicon(ctx context.Context, cmd *cli.Command, nsid syntax.NSID) error 
 
 	// TODO: common net client
 	netc := netclient.NewNetClient()
-	dir := identity.BaseDirectory{}
+	dir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
 	did, err := dir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return fmt.Errorf("failed to resolve NSID %s: %w", nsid, err)

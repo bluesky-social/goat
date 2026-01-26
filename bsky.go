@@ -33,7 +33,7 @@ func runBskyPost(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide post text as argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {

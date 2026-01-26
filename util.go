@@ -15,17 +15,34 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func resolveIdent(ctx context.Context, arg string) (*identity.Identity, error) {
+// helper to configure identity directory with PLC host (from env var) and user agent
+func configDirectory(plcHost string) identity.Directory {
+	dir := identity.DefaultDirectory()
+
+	cdir, ok := dir.(*identity.CacheDirectory)
+	if ok {
+		bdir, ok := cdir.Inner.(*identity.BaseDirectory)
+		if ok {
+			bdir.UserAgent = userAgentString()
+			if plcHost != "" {
+				bdir.PLCURL = plcHost
+			}
+		}
+	}
+	return dir
+}
+
+func resolveIdent(ctx context.Context, cmd *cli.Command, arg string) (*identity.Identity, error) {
 	id, err := syntax.ParseAtIdentifier(arg)
 	if err != nil {
 		return nil, err
 	}
 
-	dir := identity.DefaultDirectory()
+	dir := configDirectory(cmd.String("plc-host"))
 	return dir.Lookup(ctx, id)
 }
 
-func resolveToDID(ctx context.Context, s string) (syntax.DID, error) {
+func resolveToDID(ctx context.Context, cmd *cli.Command, s string) (syntax.DID, error) {
 	atid, err := syntax.ParseAtIdentifier(s)
 	if err != nil {
 		return "", err
@@ -35,8 +52,11 @@ func resolveToDID(ctx context.Context, s string) (syntax.DID, error) {
 		return did, nil
 	}
 	hdl, _ := atid.AsHandle()
-	dir := identity.BaseDirectory{}
-	return dir.ResolveHandle(ctx, hdl)
+	bdir := identity.BaseDirectory{
+		PLCURL:    cmd.String("plc-host"),
+		UserAgent: userAgentString(),
+	}
+	return bdir.ResolveHandle(ctx, hdl)
 }
 
 const stdIOPath = "-"
