@@ -11,7 +11,6 @@ import (
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/auth"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -211,7 +210,7 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		dir := identity.DefaultDirectory()
+		dir := configDirectory(cmd.String("plc-host"))
 		client, err = atclient.LoginWithPassword(ctx, dir, username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
 	}
 	if err != nil {
@@ -242,7 +241,7 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -272,7 +271,7 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountCheckAuth(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -297,7 +296,7 @@ func runAccountCheckAuth(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountMissingBlobs(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -324,7 +323,7 @@ func runAccountMissingBlobs(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountActivate(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -341,7 +340,7 @@ func runAccountActivate(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountDeactivate(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -367,7 +366,7 @@ func runAccountUpdateHandle(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -386,7 +385,7 @@ func runAccountUpdateHandle(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountServiceAuth(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {

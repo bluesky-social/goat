@@ -99,6 +99,7 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 
 	// main thing is skipping handle verification
 	bdir := identity.BaseDirectory{
+		PLCURL:                 cmd.String("plc-host"),
 		SkipHandleVerification: true,
 		TryAuthoritativeDNS:    false,
 		SkipDNSDomainSuffixes:  []string{".bsky.social"},

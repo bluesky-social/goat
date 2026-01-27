@@ -21,7 +21,7 @@ var cmdAccountPlc = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "plc-host",
-			Usage:   "method, hostname, and port of PLC registry",
+			Usage:   "method, hostname, and port of PLC directory",
 			Value:   "https://plc.directory",
 			Sources: cli.EnvVars("ATP_PLC_HOST"),
 		},
@@ -81,7 +81,7 @@ var cmdAccountPlc = &cli.Command{
 
 func runAccountPlcRecommended(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -104,7 +104,7 @@ func runAccountPlcRecommended(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountPlcRequestToken(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -127,7 +127,7 @@ func runAccountPlcSign(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide JSON file path as an argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -170,7 +170,7 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide JSON file path as an argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -215,7 +215,7 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 
 func runAccountPlcCurrent(ctx context.Context, cmd *cli.Command) error {
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession || client.Auth == nil {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
@@ -248,7 +248,7 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {

@@ -168,7 +168,7 @@ func runPDSAdminAccountTakedown(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func runPDSAdminAccountDelete(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func runPDSAdminAccountInfo(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -292,7 +292,7 @@ func runPDSAdminAccountUpdate(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -340,7 +340,7 @@ func runPDSAdminAccountResetPassword(ctx context.Context, cmd *cli.Command) erro
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -374,7 +374,7 @@ func runPDSAdminBlobStatus(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide blob CID as second argument")
 	}
 
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -407,7 +407,7 @@ func runPDSAdminBlobPurge(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide blob CID as second argument")
 	}
 
-	did, err := resolveToDID(ctx, username)
+	did, err := resolveToDID(ctx, cmd, username)
 	if err != nil {
 		return err
 	}

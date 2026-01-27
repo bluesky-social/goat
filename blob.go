@@ -71,7 +71,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func runBlobList(ctx context.Context, cmd *cli.Command) error {
 	if username == "" {
 		return fmt.Errorf("need to provide username as an argument")
 	}
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide blob CID as second argument")
 	}
 	blobCID := cmd.Args().Get(1)
-	ident, err := resolveIdent(ctx, username)
+	ident, err := resolveIdent(ctx, cmd, username)
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
 
-	client, err := loadAuthClient(ctx)
+	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {

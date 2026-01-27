@@ -10,7 +10,6 @@ import (
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/adrg/xdg"
@@ -90,7 +89,7 @@ func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.API
 	username := cmd.String("username")
 	password := cmd.String("password")
 	if username != "" && password != "" {
-		dir := identity.DefaultDirectory()
+		dir := configDirectory(cmd.String("plc-host"))
 		atid, err := syntax.ParseAtIdentifier(username)
 		if err != nil {
 			return nil, err
@@ -99,10 +98,10 @@ func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.API
 	}
 
 	// otherwise try loading from disk
-	return loadAuthClient(ctx)
+	return loadAuthClient(ctx, cmd)
 }
 
-func loadAuthClient(ctx context.Context) (*atclient.APIClient, error) {
+func loadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.APIClient, error) {
 
 	sess, err := loadAuthSessionFile()
 	if err != nil {
@@ -124,7 +123,7 @@ func loadAuthClient(ctx context.Context) (*atclient.APIClient, error) {
 	}
 
 	// otherwise try new auth session using saved password
-	dir := identity.DefaultDirectory()
+	dir := configDirectory(cmd.String("plc-host"))
 	return atclient.LoginWithPassword(ctx, dir, sess.DID.AtIdentifier(), sess.Password, "", authRefreshCallback)
 }
 

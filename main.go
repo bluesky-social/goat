@@ -38,6 +38,12 @@ func run(args []string) error {
 				Usage:   "log verbosity level (eg: warn, info, debug)",
 				Sources: cli.EnvVars("GOAT_LOG_LEVEL", "GO_LOG_LEVEL", "LOG_LEVEL"),
 			},
+			&cli.StringFlag{
+				Name:    "plc-host",
+				Usage:   "method, hostname, and port of PLC directory",
+				Value:   "https://plc.directory",
+				Sources: cli.EnvVars("ATP_PLC_HOST"),
+			},
 		},
 	}
 	app.Commands = []*cli.Command{

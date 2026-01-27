@@ -59,7 +59,7 @@ var cmdAccountMigrate = &cli.Command{
 
 func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	// NOTE: this could check rev / commit before and after and ensure last-minute content additions get lost
-	oldClient, err := loadAuthClient(ctx)
+	oldClient, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
