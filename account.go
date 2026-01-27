@@ -189,7 +189,9 @@ var cmdAccount = &cli.Command{
 					Usage: "service auth token (for account migration)",
 				},
 			},
-			Action: runAccountCreate,
+			Action: func(ctx context.Context, cmd *cli.Command) error {
+				return runAccountCreate(ctx, cmd, nil)
+			},
 		},
 		cmdAccountMigrate,
 		cmdAccountPlc,
@@ -467,7 +469,7 @@ func runAccountServiceAuthOffline(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
+func runAccountCreate(ctx context.Context, cmd *cli.Command, inviteCode *string) error {
 
 	// validate args
 	pdsHost := cmd.String("pds-host")
@@ -498,10 +500,14 @@ func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
 		s := raw
 		params.Email = &s
 	}
-	raw = cmd.String("invite-code")
-	if raw != "" {
-		s := raw
-		params.InviteCode = &s
+	if inviteCode != nil {
+		params.InviteCode = inviteCode
+	} else {
+		raw = cmd.String("invite-code")
+		if raw != "" {
+			s := raw
+			params.InviteCode = &s
+		}
 	}
 	raw = cmd.String("recovery-key")
 	if raw != "" {

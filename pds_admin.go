@@ -90,6 +90,37 @@ var cmdPDSAdmin = &cli.Command{
 					Usage:     "generate new password (and print to stdout)",
 					Action:    runPDSAdminAccountResetPassword,
 				},
+				&cli.Command{
+					Name:  "create",
+					Usage: "create a new account (auto-generates invite code)",
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:     "handle",
+							Usage:    "handle for new account",
+							Required: true,
+							Sources:  cli.EnvVars("ATP_AUTH_HANDLE"),
+						},
+						&cli.StringFlag{
+							Name:     "password",
+							Usage:    "initial account password",
+							Required: true,
+							Sources:  cli.EnvVars("ATP_AUTH_PASSWORD"),
+						},
+						&cli.StringFlag{
+							Name:  "email",
+							Usage: "email address for new account",
+						},
+						&cli.StringFlag{
+							Name:  "existing-did",
+							Usage: "an existing DID to use (eg, non-PLC DID, or migration)",
+						},
+						&cli.StringFlag{
+							Name:  "recovery-key",
+							Usage: "public cryptographic key (did:key) to add as PLC recovery",
+						},
+					},
+					Action: runPDSAdminAccountCreate,
+				},
 			},
 		},
 		&cli.Command{
@@ -452,4 +483,20 @@ func runPDSAdminCreateInvites(ctx context.Context, cmd *cli.Command) error {
 		fmt.Println(resp.Code)
 	}
 	return nil
+}
+
+func runPDSAdminAccountCreate(ctx context.Context, cmd *cli.Command) error {
+	adminClient, err := NewPDSAdminClient(cmd)
+	if err != nil {
+		return err
+	}
+
+	inviteResp, err := comatproto.ServerCreateInviteCode(ctx, adminClient, &comatproto.ServerCreateInviteCode_Input{
+		UseCount: 1,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create invite code: %w", err)
+	}
+
+	return runAccountCreate(ctx, cmd, &inviteResp.Code)
 }
