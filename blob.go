@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
@@ -90,6 +91,9 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 
 	topDir := cmd.String("output")
 	if topDir == "" {
+		if strings.Contains(username, ":") {
+			username = strings.ReplaceAll(username, ":", "_")
+		}
 		topDir = fmt.Sprintf("%s_blobs", username)
 	}
 
