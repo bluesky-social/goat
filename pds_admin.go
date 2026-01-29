@@ -498,5 +498,5 @@ func runPDSAdminAccountCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to create invite code: %w", err)
 	}
 
-	return runAccountCreate(ctx, cmd, &inviteResp.Code)
+	return createAccount(ctx, cmd, inviteResp.Code)
 }
