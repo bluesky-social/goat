@@ -30,7 +30,7 @@ goat help bsky
 # etc
 ```
 
-Most commands use public APIs are don't require authentication. Some commands, like creating records, require an atproto account. You can log in using an "app password" with `goat account login -u <handle> -p <app-password>`.
+Most commands use public APIs are don't require authentication. Some commands, like creating records, require an atproto account. You can log in using an "app password" with `goat account login -u <handle> -p <password>`.
 
 WARNING: `goat` will store both the app password and authentication tokens in the current users home directory, in cleartext. `goat logout` will wipe the file. Intention is to eventually support configuration via environment variables to keep sensitive state in a password manager or otherwise not-cleartext-on-disk.
 

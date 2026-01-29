@@ -26,8 +26,8 @@ var cmdLexUnpublish = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:    "password",
-			Aliases: []string{"p"},
-			Usage:   "account password (app password) for login",
+			Aliases: []string{"p", "app-password"},
+			Usage:   "account password (app password recommended) for login",
 			Sources: cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
 		},
 	},

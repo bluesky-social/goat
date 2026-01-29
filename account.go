@@ -33,8 +33,8 @@ var cmdAccount = &cli.Command{
 					Sources:  cli.EnvVars("GOAT_USERNAME", "ATP_USERNAME", "ATP_AUTH_USERNAME"),
 				},
 				&cli.StringFlag{
-					Name:     "app-password",
-					Aliases:  []string{"p"},
+					Name:     "password",
+					Aliases:  []string{"p", "app-password"},
 					Required: true,
 					Usage:    "password (app password recommended)",
 					Sources:  cli.EnvVars("GOAT_PASSWORD", "ATP_PASSWORD", "ATP_AUTH_PASSWORD"),
@@ -206,14 +206,14 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 
 	pdsHost := cmd.String("pds-host")
 	if pdsHost != "" {
-		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPasswordHost(ctx, pdsHost, cmd.String("username"), cmd.String("password"), cmd.String("auth-factor-token"), authRefreshCallback)
 	} else {
 		username, err = syntax.ParseAtIdentifier(cmd.String("username"))
 		if err != nil {
 			return err
 		}
 		dir := configDirectory(cmd.String("plc-host"))
-		client, err = atclient.LoginWithPassword(ctx, dir, username, cmd.String("app-password"), cmd.String("auth-factor-token"), authRefreshCallback)
+		client, err = atclient.LoginWithPassword(ctx, dir, username, cmd.String("password"), cmd.String("auth-factor-token"), authRefreshCallback)
 	}
 	if err != nil {
 		return err
@@ -227,7 +227,7 @@ func runAccountLogin(ctx context.Context, cmd *cli.Command) error {
 	sess := AuthSession{
 		DID:          passAuth.Session.AccountDID,
 		PDS:          passAuth.Session.Host,
-		Password:     cmd.String("app-password"),
+		Password:     cmd.String("password"),
 		AccessToken:  passAuth.Session.AccessToken,
 		RefreshToken: passAuth.Session.RefreshToken,
 	}
