@@ -24,7 +24,7 @@ var cmdLexCheckDNS = &cli.Command{
 			Sources: cli.EnvVars("LEXICONS_DIR"),
 		},
 		&cli.StringFlag{
-			Name:  "did",
+			Name:  "example-did",
 			Usage: "lexicon publication DID for example text",
 			Value: "did:web:lex.example.com",
 		},
@@ -82,9 +82,9 @@ func runLexCheckDNS(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("    _lexicon.%s\tTXT\t\"did=%s\"\n", nsid.Authority(), cmd.String("did"))
+		fmt.Printf("    _lexicon.%s\tTXT\t\"did=%s\"\n", nsid.Authority(), cmd.String("example-did"))
 	}
-	if !cmd.IsSet("did") {
+	if !cmd.IsSet("example-did") {
 		fmt.Println("")
 		fmt.Println("(substituting your account DID for the example value)")
 	}
