@@ -160,21 +160,23 @@ var cmdAccount = &cli.Command{
 					Name:     "handle",
 					Usage:    "handle for new account",
 					Required: true,
-					Sources:  cli.EnvVars("ATP_AUTH_HANDLE"),
+					Sources:  cli.EnvVars("NEW_ACCOUNT_HANDLE"),
 				},
 				&cli.StringFlag{
 					Name:     "password",
 					Usage:    "initial account password",
 					Required: true,
-					Sources:  cli.EnvVars("ATP_AUTH_PASSWORD"),
+					Sources:  cli.EnvVars("NEW_ACCOUNT_PASSWORD"),
+				},
+				&cli.StringFlag{
+					Name:     "email",
+					Usage:    "email address for new account",
+					Required: true,
+					Sources:  cli.EnvVars("NEW_ACCOUNT_EMAIL"),
 				},
 				&cli.StringFlag{
 					Name:  "invite-code",
 					Usage: "invite code for account signup",
-				},
-				&cli.StringFlag{
-					Name:  "email",
-					Usage: "email address for new account",
 				},
 				&cli.StringFlag{
 					Name:  "existing-did",
