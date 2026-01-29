@@ -4,18 +4,21 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## UNRELEASED
-
+## [0.2.2] - 2026-01-28
 
 ### Fixed
 
 - resolved a panic with failed account login attempts
 - login to inactive accounts is possible (eg, deactivated)
+- consistent use of HTTP proxy env vars (via indigo SDK change)
+
+### Added
+
+- PDS admin account creation command (thanks @axfelix)
 
 ### Changed
 
 - updated indigo SDK dependency
-- consistent use of HTTP proxy env vars (via indigo SDK change)
 
 ## [0.2.1] - 2025-12-05
 
