@@ -160,21 +160,23 @@ var cmdAccount = &cli.Command{
 					Name:     "handle",
 					Usage:    "handle for new account",
 					Required: true,
-					Sources:  cli.EnvVars("ATP_AUTH_HANDLE"),
+					Sources:  cli.EnvVars("NEW_ACCOUNT_HANDLE"),
 				},
 				&cli.StringFlag{
 					Name:     "password",
 					Usage:    "initial account password",
 					Required: true,
-					Sources:  cli.EnvVars("ATP_AUTH_PASSWORD"),
+					Sources:  cli.EnvVars("NEW_ACCOUNT_PASSWORD"),
+				},
+				&cli.StringFlag{
+					Name:     "email",
+					Usage:    "email address for new account",
+					Required: true,
+					Sources:  cli.EnvVars("NEW_ACCOUNT_EMAIL"),
 				},
 				&cli.StringFlag{
 					Name:  "invite-code",
 					Usage: "invite code for account signup",
-				},
-				&cli.StringFlag{
-					Name:  "email",
-					Usage: "email address for new account",
 				},
 				&cli.StringFlag{
 					Name:  "existing-did",
@@ -468,6 +470,12 @@ func runAccountServiceAuthOffline(ctx context.Context, cmd *cli.Command) error {
 }
 
 func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
+	return createAccount(ctx, cmd, cmd.String("invite-code"))
+}
+
+// helper for creating a PDS account.
+// inviteCode is optional (ignored if empty string). any "invite-code" arg from cmd is ignored.
+func createAccount(ctx context.Context, cmd *cli.Command, inviteCode string) error {
 
 	// validate args
 	pdsHost := cmd.String("pds-host")
@@ -498,11 +506,10 @@ func runAccountCreate(ctx context.Context, cmd *cli.Command) error {
 		s := raw
 		params.Email = &s
 	}
-	raw = cmd.String("invite-code")
-	if raw != "" {
-		s := raw
-		params.InviteCode = &s
+	if inviteCode != "" {
+		params.InviteCode = &inviteCode
 	}
+
 	raw = cmd.String("recovery-key")
 	if raw != "" {
 		s := raw
