@@ -34,12 +34,12 @@ var cmdAccountPlc = &cli.Command{
 		},
 		&cli.Command{
 			Name:   "request-token",
-			Usage:  "request a 2FA token (by email) for signing op",
+			Usage:  "request a 2FA token (by email) for signing op. requires full account password.",
 			Action: runAccountPlcRequestToken,
 		},
 		&cli.Command{
 			Name:      "sign",
-			Usage:     "sign a PLC operation",
+			Usage:     "sign a PLC operation. requires full account password.",
 			ArgsUsage: `<json-file>`,
 			Action:    runAccountPlcSign,
 			Flags: []cli.Flag{
@@ -62,7 +62,7 @@ var cmdAccountPlc = &cli.Command{
 		},
 		&cli.Command{
 			Name:      "add-rotation-key",
-			Usage:     "add a new rotation key to PLC identity (via PDS)",
+			Usage:     "add a new rotation key to PLC identity (via PDS). requires full account password.",
 			ArgsUsage: `<pubkey>`,
 			Action:    runAccountPlcAddRotationKey,
 			Flags: []cli.Flag{
