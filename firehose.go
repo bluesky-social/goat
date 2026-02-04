@@ -116,7 +116,7 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 		VerifyBasic:      cmd.Bool("verify-basic"),
 		VerifySig:        cmd.Bool("verify-sig"),
 		VerifyMST:        cmd.Bool("verify-mst"),
-		Dir:              &cdir,
+		Dir:              cdir,
 	}
 
 	var relayHost string

@@ -132,7 +132,7 @@ func collectCatalog(cmd *cli.Command) (lexicon.Catalog, error) {
 			}
 		}
 	}
-	return &cat, nil
+	return cat, nil
 }
 
 func loadSchemaJSON(fpath string) (syntax.NSID, *json.RawMessage, error) {

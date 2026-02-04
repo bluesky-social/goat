@@ -290,7 +290,7 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	if err := lexicon.ValidateRecord(&cat, recordData, nsid.String(), flags); err != nil {
+	if err := lexicon.ValidateRecord(cat, recordData, nsid.String(), flags); err != nil {
 		return err
 	}
 	fmt.Printf("valid %s record\n", nsid)
