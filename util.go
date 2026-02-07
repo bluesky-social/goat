@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -12,7 +13,9 @@ import (
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/earthboundkid/versioninfo/v2"
+	"github.com/tidwall/pretty"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/term"
 )
 
 // helper to configure identity directory with PLC host (from env var) and user agent
@@ -123,4 +126,25 @@ func parseDIDRef(raw string) error {
 	}
 	// TODO: more syntax checks on fragment
 	return nil
+}
+func printJSON(v any, useColor bool) error {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return err
+	}
+	if useColor {
+		b = pretty.Color(b, nil)
+	}
+	fmt.Println(string(b))
+	return nil
+}
+
+func colorEnabled(cmd *cli.Command) bool {
+	if cmd.Bool("no-color") {
+		return false
+	}
+	if os.Getenv("NO_COLOR") != "" {
+		return false
+	}
+	return term.IsTerminal(int(os.Stdout.Fd()))
 }

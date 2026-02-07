@@ -89,11 +89,9 @@ func compareBreaking(ctx context.Context, cmd *cli.Command, nsid syntax.NSID, lo
 
 	if cmd.Bool("json") {
 		for _, iss := range issues {
-			b, err := json.Marshal(iss)
-			if err != nil {
+			if err := printJSON(iss, colorEnabled(cmd)); err != nil {
 				return nil
 			}
-			fmt.Println(string(b))
 		}
 	} else {
 		if len(issues) == 0 {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -96,11 +95,9 @@ func runPDSDescribe(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
+	if err := printJSON(resp, colorEnabled(cmd)); err != nil {
 		return err
 	}
-	fmt.Println(string(b))
 
 	return nil
 }
@@ -124,11 +121,9 @@ func runPDSAccountList(ctx context.Context, cmd *cli.Command) error {
 
 		for _, r := range resp.Repos {
 			if cmd.Bool("json") {
-				b, err := json.Marshal(r)
-				if err != nil {
+				if err := printJSON(r, colorEnabled(cmd)); err != nil {
 					return err
 				}
-				fmt.Println(string(b))
 			} else {
 				status := "unknown"
 				if r.Active != nil && *r.Active {
@@ -177,11 +172,7 @@ func runPDSAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Bool("json") {
-		b, err := json.Marshal(r)
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(b))
+		return printJSON(r, colorEnabled(cmd))
 	} else {
 		status := "unknown"
 		if r.Active {

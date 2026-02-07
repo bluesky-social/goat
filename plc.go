@@ -228,11 +228,9 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	for _, op := range oplog {
-		b, err := json.MarshalIndent(op, "", "  ")
-		if err != nil {
+		if err := printJSON(op, colorEnabled(cmd)); err != nil {
 			return err
 		}
-		fmt.Println(string(b))
 	}
 
 	return nil
@@ -280,12 +278,7 @@ func runPLCData(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(plcData, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(plcData, colorEnabled(cmd))
 }
 
 func runPLCDump(ctx context.Context, cmd *cli.Command) error {
@@ -355,11 +348,9 @@ func runPLCDump(ctx context.Context, cmd *cli.Command) error {
 				continue
 			}
 
-			b, err := json.Marshal(op)
-			if err != nil {
+			if err := printJSON(op, colorEnabled(cmd)); err != nil {
 				return err
 			}
-			fmt.Println(string(b))
 		}
 		if cursor != "" && cursor == lastCursor {
 			if tailMode {
@@ -467,13 +458,7 @@ func runPLCGenesis(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	res, err := json.MarshalIndent(op, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(res))
-
-	return nil
+	return printJSON(op, colorEnabled(cmd))
 }
 
 func runPLCCalcDID(ctx context.Context, cmd *cli.Command) error {
@@ -547,13 +532,7 @@ func runPLCSign(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	res, err := json.MarshalIndent(op, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(res))
-
-	return nil
+	return printJSON(op, colorEnabled(cmd))
 }
 
 func runPLCSubmit(ctx context.Context, cmd *cli.Command) error {
@@ -750,11 +729,5 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	res, err := json.MarshalIndent(op, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(res))
-
-	return nil
+	return printJSON(op, colorEnabled(cmd))
 }

@@ -93,13 +93,7 @@ func runAccountPlcRecommended(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(b))
-	return nil
+	return printJSON(resp, colorEnabled(cmd))
 }
 
 func runAccountPlcRequestToken(ctx context.Context, cmd *cli.Command) error {
@@ -154,13 +148,7 @@ func runAccountPlcSign(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(resp.Operation, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(b))
-	return nil
+	return printJSON(resp.Operation, colorEnabled(cmd))
 }
 
 func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
@@ -227,12 +215,7 @@ func runAccountPlcCurrent(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(plcData, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(plcData, colorEnabled(cmd))
 }
 
 func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
