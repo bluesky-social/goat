@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -285,13 +284,11 @@ func runAccountCheckAuth(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed checking account status: %w", err)
 	}
 
-	b, err := json.MarshalIndent(status, "", "  ")
-	if err != nil {
-		return err
-	}
 	fmt.Printf("DID: %s\n", client.AccountDID)
 	fmt.Printf("Host: %s\n", client.Host)
-	fmt.Println(string(b))
+	if err := printJSON(status, colorEnabled(cmd)); err != nil {
+		return err
+	}
 
 	return nil
 }

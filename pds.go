@@ -96,11 +96,9 @@ func runPDSDescribe(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
+	if err := printJSON(resp, colorEnabled(cmd)); err != nil {
 		return err
 	}
-	fmt.Println(string(b))
 
 	return nil
 }

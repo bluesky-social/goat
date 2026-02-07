@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -217,11 +216,9 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(resp.Blob, "", "  ")
-	if err != nil {
+	if err := printJSON(resp.Blob, colorEnabled(cmd)); err != nil {
 		return err
 	}
 
-	fmt.Println(string(b))
 	return nil
 }

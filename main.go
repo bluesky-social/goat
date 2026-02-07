@@ -44,6 +44,10 @@ func run(args []string) error {
 				Value:   "https://plc.directory",
 				Sources: cli.EnvVars("ATP_PLC_HOST"),
 			},
+			&cli.BoolFlag{
+				Name:  "no-color",
+				Usage: "disable colored output",
+			},
 		},
 	}
 	app.Commands = []*cli.Command{
