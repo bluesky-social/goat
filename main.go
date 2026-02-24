@@ -51,6 +51,7 @@ func run(args []string) error {
 		cmdRecordList,
 		cmdFirehose,
 		cmdResolve,
+		cmdXrpc,
 		cmdRepo,
 		cmdBlob,
 		cmdLex,
