@@ -96,7 +96,8 @@ Make a public snapshot of your account:
 $ goat repo export jay.bsky.team
 downloading from https://morel.us-east.host.bsky.network to: jay.bsky.team.20240811183155.car
 
-$ downloading blobs to: jay.bsky.team_blobs
+$ goat blob export jay.bsky.team 
+downloading blobs to: jay.bsky.team_blobs
 jay.bsky.team_blobs/bafkreia2x4faux5y7v7v54yl5ebkbaek7z7nhmsd4cooubz3yj4zox34cq	downloaded
 jay.bsky.team_blobs/bafkreia3qgbww7odprmysd6jcyxoh5sczkwoxinnmzpsp73gs623fqfm3a	downloaded
 jay.bsky.team_blobs/bafkreia3rgnywdrysy65vid42ulyno2cybxhxrn3ragm7cw3smmsxzvbs4	downloaded
