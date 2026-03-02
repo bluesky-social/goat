@@ -53,6 +53,10 @@ var cmdBlob = &cli.Command{
 					Aliases: []string{"o"},
 					Usage:   "file path to store blob at",
 				},
+				&cli.StringFlag{
+					Name:  "pds-host",
+					Usage: "URL of the PDS to download blob from (overrides DID doc)",
+				},
 			},
 			Action: runBlobDownload,
 		},
@@ -173,8 +177,13 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	pdsHost := cmd.String("pds-host")
+	if pdsHost == "" {
+		pdsHost = ident.PDSEndpoint()
+	}
+
 	// create a new API client to connect to the account's PDS
-	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client := atclient.NewAPIClient(pdsHost)
 	client.Headers.Set("User-Agent", userAgentString())
 
 	blobPath := cmd.String("output")
