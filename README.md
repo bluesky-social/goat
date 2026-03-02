@@ -30,9 +30,9 @@ goat help bsky
 # etc
 ```
 
-Most commands use public APIs are don't require authentication. Some commands, like creating records, require an atproto account. You can log in using an "app password" with `goat account login -u <handle> -p <password>`.
+Most commands use public APIs and don't require authentication. Some commands, like creating records, require an atproto account. You can log in using an "app password" with `goat account login -u <handle> -p <password>`.
 
-WARNING: `goat` will store both the app password and authentication tokens in the current users home directory, in cleartext. `goat logout` will wipe the file. Intention is to eventually support configuration via environment variables to keep sensitive state in a password manager or otherwise not-cleartext-on-disk.
+WARNING: `goat` will store both the app password and authentication tokens in the current users home directory, in cleartext. `goat account logout` will wipe the file. Intention is to eventually support configuration via environment variables to keep sensitive state in a password manager or otherwise not-cleartext-on-disk.
 
 Some commands output JSON, and you can use tools like `jq` to process them.
 
@@ -96,7 +96,8 @@ Make a public snapshot of your account:
 $ goat repo export jay.bsky.team
 downloading from https://morel.us-east.host.bsky.network to: jay.bsky.team.20240811183155.car
 
-$ downloading blobs to: jay.bsky.team_blobs
+$ goat blob export jay.bsky.team 
+downloading blobs to: jay.bsky.team_blobs
 jay.bsky.team_blobs/bafkreia2x4faux5y7v7v54yl5ebkbaek7z7nhmsd4cooubz3yj4zox34cq	downloaded
 jay.bsky.team_blobs/bafkreia3qgbww7odprmysd6jcyxoh5sczkwoxinnmzpsp73gs623fqfm3a	downloaded
 jay.bsky.team_blobs/bafkreia3rgnywdrysy65vid42ulyno2cybxhxrn3ragm7cw3smmsxzvbs4	downloaded
