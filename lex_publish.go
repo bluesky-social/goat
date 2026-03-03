@@ -63,8 +63,10 @@ publish behavior:
 func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 
 	c, err := loginOrLoadAuthClient(ctx, cmd)
-	if err != nil {
-		return nil
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("auth required, but not logged in")
+	} else if err != nil {
+		return err
 	}
 
 	if c.AccountDID == nil {
