@@ -84,6 +84,7 @@ type GoatFirehoseConsumer struct {
 	AccountsOnly bool
 	Quiet        bool
 	Blocks       bool
+	Color        bool
 	VerifyBasic  bool
 	VerifySig    bool
 	VerifyMST    bool
@@ -113,6 +114,7 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 		CollectionFilter: cmd.StringSlice("collection"),
 		Quiet:            cmd.Bool("quiet"),
 		Blocks:           cmd.Bool("blocks"),
+		Color:            colorEnabled(cmd),
 		VerifyBasic:      cmd.Bool("verify-basic"),
 		VerifySig:        cmd.Bool("verify-sig"),
 		VerifyMST:        cmd.Bool("verify-mst"),
@@ -224,7 +226,7 @@ func (gfc *GoatFirehoseConsumer) handleIdentityEvent(ctx context.Context, evt *c
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(b))
+	gfc.println(b)
 	return nil
 }
 
@@ -244,7 +246,7 @@ func (gfc *GoatFirehoseConsumer) handleAccountEvent(ctx context.Context, evt *co
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(b))
+	gfc.println(b)
 	return nil
 }
 
@@ -275,7 +277,7 @@ func (gfc *GoatFirehoseConsumer) handleSyncEvent(ctx context.Context, evt *comat
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(b))
+	gfc.println(b)
 	return nil
 }
 
@@ -394,7 +396,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEvent(ctx context.Context, evt *com
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(b))
+	gfc.println(b)
 	return nil
 }
 
@@ -470,7 +472,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 				return err
 			}
 			if !gfc.Quiet {
-				fmt.Println(string(b))
+				gfc.println(b)
 			}
 		case "delete":
 			out["action"] = "delete"
@@ -479,11 +481,18 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 				return err
 			}
 			if !gfc.Quiet {
-				fmt.Println(string(b))
+				gfc.println(b)
 			}
 		default:
 			logger.Error("unexpected record op kind")
 		}
 	}
 	return nil
+}
+
+func (gfc *GoatFirehoseConsumer) println(b []byte) {
+	if gfc.Color {
+		b = colorizeJSON(b)
+	}
+	fmt.Println(string(b))
 }

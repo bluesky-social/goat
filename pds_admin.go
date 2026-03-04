@@ -311,12 +311,7 @@ func runPDSAdminAccountInfo(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(r, colorEnabled(cmd))
 }
 
 func runPDSAdminAccountUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -421,12 +416,7 @@ func runPDSAdminBlobStatus(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(resp, colorEnabled(cmd))
 }
 
 func runPDSAdminBlobPurge(ctx context.Context, cmd *cli.Command) error {

@@ -45,11 +45,9 @@ func runBskyPrefsExport(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed fetching old preferences: %w", err)
 	}
 
-	b, err := json.MarshalIndent(resp.Preferences, "", "  ")
-	if err != nil {
+	if err := printJSON(resp.Preferences, colorEnabled(cmd)); err != nil {
 		return err
 	}
-	fmt.Println(string(b))
 
 	return nil
 }

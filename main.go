@@ -16,9 +16,21 @@ var Version string
 
 func main() {
 	if err := run(os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		if stderrIsTerminal() && os.Getenv("NO_COLOR") == "" {
+			fmt.Fprintf(os.Stderr, "\033[1;31merror:\033[0m %v\n", err)
+		} else {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		}
 		os.Exit(-1)
 	}
+}
+
+func stderrIsTerminal() bool {
+	fi, err := os.Stderr.Stat()
+	if err != nil {
+		return false
+	}
+	return (fi.Mode() & os.ModeCharDevice) != 0
 }
 
 func run(args []string) error {
@@ -43,6 +55,10 @@ func run(args []string) error {
 				Usage:   "method, hostname, and port of PLC directory",
 				Value:   "https://plc.directory",
 				Sources: cli.EnvVars("ATP_PLC_HOST"),
+			},
+			&cli.BoolFlag{
+				Name:  "no-color",
+				Usage: "disable colored output",
 			},
 		},
 	}
