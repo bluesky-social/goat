@@ -162,6 +162,24 @@ A minimal bsky posting interface, requires account login:
 $ goat bsky post "hello from goat"
 ```
 
+The `xrpc` command can be used to make HTTP API calls. These can be authenticated (eg, proxy via PDS), or direct to hostnames:
+
+```bash
+# call an XRPC endpoint (HTTP GET) on an unauthenticated host
+$ goat xrpc query https://public.api.bsky.app app.bsky.actor.getProfile actor==atproto.com
+
+# make an authenticated PDS proxy call (HTTP GET) to a remote XRPC service, identified by DID service reference, and with a custom label header set
+$ goat xrpc query did:web:api.bsky.app#bsky_appview app.bsky.actor.getProfile actor==atproto.com Atproto-Accept-Labelers:did:plc:d2mkddsbmnrgr3domzg5qexf
+
+# make an authenticated XRPC call (HTTP POST) to the authenticated user's PDS instance. in this case, upload a blob from a file, with mediatype specified
+# note that 'goat blob upload' provides the same functionality
+goat xrpc procedure @pds com.atproto.repo.uploadBlob Content-Type:image/png - < ./image.png
+
+# make an authenticated XRPC call to the PDS. in this case, create a dummy record, demonstrating how to construct trequest body fields via args
+# note that 'goat record create' provides the same functionality
+goat xrpc procedure @pds com.atproto.repo.createRecord repo=did:plc:abc123 collection=example.nsid.record rkey=goat01 validate:=false 'record:={"text": "hello"}'
+```
+
 ## Lexicon Development
 
 In a project directory, download some existing schemas, which will get saved as JSON files in `./lexicons/`:
