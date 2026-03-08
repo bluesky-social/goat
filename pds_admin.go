@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -246,11 +245,9 @@ func runPDSAdminAccountList(ctx context.Context, cmd *cli.Command) error {
 
 		for _, r := range resp.Repos {
 			if cmd.Bool("json") {
-				b, err := json.Marshal(r)
-				if err != nil {
+				if err := printJSON(r, colorEnabled(cmd)); err != nil {
 					return err
 				}
-				fmt.Println(string(b))
 			} else {
 				status := "unknown"
 				if r.Active != nil && *r.Active {
@@ -311,12 +308,7 @@ func runPDSAdminAccountInfo(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(r, colorEnabled(cmd))
 }
 
 func runPDSAdminAccountUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -421,12 +413,7 @@ func runPDSAdminBlobStatus(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-	return nil
+	return printJSON(resp, colorEnabled(cmd))
 }
 
 func runPDSAdminBlobPurge(ctx context.Context, cmd *cli.Command) error {

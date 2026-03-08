@@ -86,11 +86,9 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	b, err := json.MarshalIndent(raw, "", "  ")
-	if err != nil {
+	if err := printJSON(raw, colorEnabled(cmd)); err != nil {
 		return err
 	}
 
-	fmt.Println(string(b))
 	return nil
 }

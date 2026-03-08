@@ -150,11 +150,9 @@ func runLexResolve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	b, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
+	if err := printJSON(data, colorEnabled(cmd)); err != nil {
 		return err
 	}
-	fmt.Println(string(b))
 
 	return nil
 }

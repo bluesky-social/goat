@@ -94,11 +94,9 @@ func lintFilePath(ctx context.Context, cmd *cli.Command, p string) error {
 			Message:         err.Error(),
 		}
 		if cmd.Bool("json") {
-			b, err := json.Marshal(iss)
-			if err != nil {
+			if err := printJSON(iss, colorEnabled(cmd)); err != nil {
 				return nil
 			}
-			fmt.Println(string(b))
 		} else {
 			fmt.Printf(" 🔴 %s\n", p)
 			fmt.Printf("    [%s]: %s\n", iss.LintName, iss.Message)
@@ -129,11 +127,9 @@ func lintFilePath(ctx context.Context, cmd *cli.Command, p string) error {
 
 	if cmd.Bool("json") {
 		for _, iss := range issues {
-			b, err := json.Marshal(iss)
-			if err != nil {
+			if err := printJSON(iss, colorEnabled(cmd)); err != nil {
 				return nil
 			}
-			fmt.Println(string(b))
 		}
 	} else {
 		if len(issues) == 0 {

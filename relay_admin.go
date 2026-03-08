@@ -339,11 +339,9 @@ func runRelayAdminHostList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	for _, r := range rows {
-		b, err := json.Marshal(r)
-		if err != nil {
+		if err := printJSON(r, colorEnabled(cmd)); err != nil {
 			return nil
 		}
-		fmt.Println(string(b))
 	}
 	return nil
 }
@@ -440,11 +438,9 @@ func runRelayAdminConsumerList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	for _, r := range rows {
-		b, err := json.Marshal(r)
-		if err != nil {
+		if err := printJSON(r, colorEnabled(cmd)); err != nil {
 			return nil
 		}
-		fmt.Println(string(b))
 	}
 	return nil
 }
