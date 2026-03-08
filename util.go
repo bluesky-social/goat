@@ -107,3 +107,20 @@ func configLogger(cmd *cli.Command, writer io.Writer) *slog.Logger {
 func userAgentString() string {
 	return fmt.Sprintf("goat/%s", versioninfo.Short())
 }
+
+// attempts to parse a DID-and-reference string
+func parseDIDRef(raw string) error {
+	parts := strings.SplitN(raw, "#", 3)
+	if len(parts) != 2 {
+		return fmt.Errorf("not a DID-and-fragment")
+	}
+	_, err := syntax.ParseDID(parts[0])
+	if err != nil {
+		return err
+	}
+	if len(parts[1]) == 0 {
+		return fmt.Errorf("empty fragment")
+	}
+	// TODO: more syntax checks on fragment
+	return nil
+}
