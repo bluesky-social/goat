@@ -20,22 +20,12 @@ var cmdXrpc = &cli.Command{
 	Name:        "xrpc",
 	Usage:       "call remote XRPC (HTTP API) endpoints",
 	ArgsUsage:   `<method> <service> <endpoint> [args...]`,
-	Description: "Flexible tool for calling arbitrary XRPC endpoints on remote services. Supports multiple types of service endpoint resolution and auth.\n'method' is the HTTP/XRPC method type (eg 'query' or 'procedure').\n'service' identifies the remote host. Provide an HTTP/HTTPS base URL for direct connections, or a service DID reference for authenticated PDS proxying.\n'endpoint' is an NSID identifying the API endpoint.\nAdditional args follow HTTPie CLI syntax: 'key==value' sets a query param, 'key=value' sets a JSON request body string field; 'key:=123' sets a non-string field",
+	Description: "Flexible tool for calling arbitrary XRPC endpoints on remote services. Supports multiple types of service endpoint resolution and auth.\n'method' is the HTTP/XRPC method type (eg 'query' or 'procedure').\n'service' identifies the remote host. Provide an HTTP/HTTPS base URL for direct connections, or a service DID reference for authenticated PDS proxying. Provide '@pds' for authenticated requests to the current account PDS.\n'endpoint' is an NSID identifying the API endpoint.\nAdditional args follow HTTPie CLI syntax: 'key==value' sets a query param, 'key=value' sets a JSON request body string field; 'key:=123' sets a non-string JSON request body field; 'key:value' sets an HTTP request header; '-' reads a request body from stdin (may need to specify Content-Type header)",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "admin-password",
 			Usage:   "admin password (for admin auth calls)",
 			Sources: cli.EnvVars("ADMIN_PASSWORD", "ATP_AUTH_ADMIN_PASSWORD"),
-		},
-		&cli.StringFlag{
-			Name:    "service-auth-key",
-			Usage:   "secret key for service auth (multikey encoding)",
-			Sources: cli.EnvVars("SERVICE_AUTH_KEY"),
-		},
-		&cli.StringFlag{
-			Name:    "service-auth-iss",
-			Usage:   "issuer DID for service auth",
-			Sources: cli.EnvVars("SERVICE_AUTH_ISS"),
 		},
 	},
 	Action: runXrpc,
@@ -66,7 +56,7 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 
 	var client *atclient.APIClient
 
-	if rawService == "_pds" {
+	if rawService == "@pds" {
 		// authenticated PDS mode
 		client, err = loadAuthClient(ctx, cmd)
 		if err != nil {
@@ -85,24 +75,30 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 			return fmt.Errorf("unknown service type: %s", rawService)
 		}
 
-		if cmd.IsSet("service-auth-key") && cmd.IsSet("service-auth-iss") {
-			// TODO: service auth mode
-			return fmt.Errorf("service auth mode is unimplemented")
-		} else {
-			// PDS service proxy mode
-			client, err = loadAuthClient(ctx, cmd)
-			if err != nil {
-				return fmt.Errorf("PDS proxied requests require session: %w", err)
-			}
-			client = client.WithService(rawService)
+		// TODO: raw service auth mode would go here
+
+		// PDS service proxy mode
+		client, err = loadAuthClient(ctx, cmd)
+		if err != nil {
+			return fmt.Errorf("PDS proxied requests require session: %w", err)
 		}
+		client = client.WithService(rawService)
 	}
 
 	params := make(url.Values)
 	reqBody := make(map[string]any)
+	reqStdin := false
+
+	req := atclient.NewAPIRequest(method, endpoint, nil)
+	req.Headers.Set("Accept", "application/json")
 
 	for i := range cmd.Args().Len() - 3 {
 		arg := cmd.Args().Get(i + 3)
+		if arg == "-" {
+			reqStdin = true
+			continue
+		}
+		// TODO: all this pattern matching is informal and not correct in corner-cases
 		if strings.HasPrefix(arg, "@") {
 			p, _ := strings.CutPrefix(arg, "@")
 			b, err := os.ReadFile(p)
@@ -128,6 +124,12 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 				return fmt.Errorf("invalid non-string field value: %w", err)
 			}
 			reqBody[parts[0]] = val
+		} else if strings.Contains(arg, ":") {
+			parts := strings.SplitN(arg, ":", 2)
+			if len(parts[0]) == 0 {
+				return fmt.Errorf("empty request header name")
+			}
+			req.Headers.Set(parts[0], parts[1])
 		} else if strings.Contains(arg, "=") {
 			parts := strings.SplitN(arg, "=", 2)
 			if len(parts[0]) == 0 {
@@ -139,16 +141,19 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	req := atclient.NewAPIRequest(method, endpoint, nil)
-	req.Headers.Set("Accept", "application/json")
-
 	if method == atclient.MethodProcedure {
-		bodyJSON, err := json.Marshal(reqBody)
-		if err != nil {
-			return err
+		if req.Headers.Get("Content-Type") == "" {
+			req.Headers.Set("Content-Type", "application/json")
 		}
-		req.Body = bytes.NewReader(bodyJSON)
-		req.Headers.Set("Content-Type", "application/json")
+		if reqStdin {
+			req.Body = os.Stdin
+		} else {
+			bodyJSON, err := json.Marshal(reqBody)
+			if err != nil {
+				return err
+			}
+			req.Body = bytes.NewReader(bodyJSON)
+		}
 	}
 
 	if len(params) > 0 {
