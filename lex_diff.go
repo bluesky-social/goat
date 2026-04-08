@@ -68,7 +68,7 @@ func compareDiff(ctx context.Context, cmd *cli.Command, nsid syntax.NSID, localJ
 
 	// compute and print diff
 	var diffString string
-	var outJSON map[string]interface{}
+	var outJSON map[string]any
 	differ := gojsondiff.New()
 	d, err := differ.Compare(localJSON, remoteJSON)
 	if err != nil {

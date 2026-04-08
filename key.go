@@ -73,7 +73,7 @@ func runKeyGenerate(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func descKeyType(val interface{}) string {
+func descKeyType(val any) string {
 	switch val.(type) {
 	case *atcrypto.PublicKeyP256, atcrypto.PublicKeyP256:
 		return "P-256 / secp256r1 / ES256 public key"

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -217,7 +218,7 @@ func (gfc *GoatFirehoseConsumer) handleIdentityEvent(ctx context.Context, evt *c
 	if gfc.Quiet {
 		return nil
 	}
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	out["type"] = "identity"
 	out["payload"] = evt
 	b, err := json.Marshal(out)
@@ -237,7 +238,7 @@ func (gfc *GoatFirehoseConsumer) handleAccountEvent(ctx context.Context, evt *co
 	if gfc.Quiet {
 		return nil
 	}
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	out["type"] = "account"
 	out["payload"] = evt
 	b, err := json.Marshal(out)
@@ -267,7 +268,7 @@ func (gfc *GoatFirehoseConsumer) handleSyncEvent(ctx context.Context, evt *comat
 	if !gfc.Blocks {
 		evt.Blocks = nil
 	}
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	out["type"] = "sync"
 	out["commit"] = commit.AsData() // NOTE: funky, but helpful, to include this in output
 	out["payload"] = evt
@@ -369,11 +370,8 @@ func (gfc *GoatFirehoseConsumer) handleCommitEvent(ctx context.Context, evt *com
 				return nil
 			}
 			collection := parts[0]
-			for _, c := range gfc.CollectionFilter {
-				if c == collection {
-					keep = true
-					break
-				}
+			if slices.Contains(gfc.CollectionFilter, collection) {
+				keep = true
 			}
 			if keep {
 				break
@@ -387,7 +385,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEvent(ctx context.Context, evt *com
 	if !gfc.Blocks {
 		evt.Blocks = nil
 	}
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	out["type"] = "commit"
 	out["payload"] = evt
 	b, err := json.Marshal(out)
@@ -421,19 +419,13 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 		logger = logger.With("eventKind", op.Action, "collection", collection, "rkey", rkey)
 
 		if len(gfc.CollectionFilter) > 0 {
-			keep := false
-			for _, c := range gfc.CollectionFilter {
-				if collection.String() == c {
-					keep = true
-					break
-				}
-			}
+			keep := slices.Contains(gfc.CollectionFilter, collection.String())
 			if !keep {
 				continue
 			}
 		}
 
-		out := make(map[string]interface{})
+		out := make(map[string]any)
 		out["seq"] = evt.Seq
 		out["rev"] = evt.Rev
 		out["time"] = evt.Time

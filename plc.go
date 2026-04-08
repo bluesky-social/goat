@@ -221,7 +221,7 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	// parse JSON and reformat for printing
-	var oplog []map[string]interface{}
+	var oplog []map[string]any
 	err = json.Unmarshal(respBytes, &oplog)
 	if err != nil {
 		return err
@@ -341,7 +341,7 @@ func runPLCDump(ctx context.Context, cmd *cli.Command) error {
 			if len(l) < 2 {
 				break
 			}
-			var op map[string]interface{}
+			var op map[string]any
 			err = json.Unmarshal([]byte(l), &op)
 			if err != nil {
 				return err
