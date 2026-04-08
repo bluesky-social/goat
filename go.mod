@@ -1,8 +1,8 @@
 module github.com/bluesky-social/goat
 
-go 1.25
+go 1.26
 
-toolchain go1.25.1
+toolchain go1.26.1
 
 require (
 	github.com/adrg/xdg v0.5.3
