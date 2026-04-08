@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -152,11 +151,9 @@ func runRelayAccountList(ctx context.Context, cmd *cli.Command) error {
 
 			for _, r := range resp.Repos {
 				if cmd.Bool("json") {
-					b, err := json.Marshal(r)
-					if err != nil {
+					if err := printJSON(r, colorEnabled(cmd)); err != nil {
 						return err
 					}
-					fmt.Println(string(b))
 				} else {
 					status := "unknown"
 					if r.Active != nil && *r.Active {
@@ -201,11 +198,7 @@ func runRelayAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Bool("json") {
-		b, err := json.Marshal(r)
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(b))
+		return printJSON(r, colorEnabled(cmd))
 	} else {
 		status := "unknown"
 		if r.Active {
@@ -263,11 +256,9 @@ func runRelayHostList(ctx context.Context, cmd *cli.Command) error {
 
 		for _, h := range resp.Hosts {
 			if cmd.Bool("json") {
-				b, err := json.Marshal(h)
-				if err != nil {
+				if err := printJSON(h, colorEnabled(cmd)); err != nil {
 					return err
 				}
-				fmt.Println(string(b))
 			} else {
 				status := ""
 				if h.Status != nil {
@@ -312,11 +303,7 @@ func runRelayHostStatus(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Bool("json") {
-		b, err := json.Marshal(h)
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(b))
+		return printJSON(h, colorEnabled(cmd))
 	} else {
 		status := ""
 		if h.Status != nil {

@@ -14,6 +14,7 @@ require (
 	github.com/ipfs/go-ipld-cbor v0.2.1
 	github.com/ipfs/go-ipld-format v0.6.2
 	github.com/joho/godotenv v1.5.1
+	github.com/tidwall/pretty v1.2.1
 	github.com/urfave/cli/v3 v3.4.1
 	github.com/xlab/treeprint v1.2.0
 	github.com/yudai/gojsondiff v1.0.0

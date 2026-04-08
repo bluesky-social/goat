@@ -174,12 +174,16 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 		return eb.APIError(resp.StatusCode)
 	}
 
-	// only if TTY output...
 	if term.IsTerminal(int(os.Stdout.Fd())) {
-		fmt.Printf("%s %s\n", resp.Proto, resp.Status)
+		useColor := colorEnabled(cmd)
+		statusFmt, headerFmt := "%s %s\n", "%s: %s\n"
+		if useColor {
+			statusFmt, headerFmt = "\033[32m%s %s\033[0m\n", "\033[36m%s\033[0m: %s\n"
+		}
+		fmt.Printf(statusFmt, resp.Proto, resp.Status)
 		for name, vals := range resp.Header {
 			for _, v := range vals {
-				fmt.Printf("%s: %s\n", name, v)
+				fmt.Printf(headerFmt, name, v)
 			}
 		}
 		fmt.Println()
@@ -190,11 +194,5 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed decoding JSON response body: %w", err)
 	}
 
-	b, err := json.MarshalIndent(respBody, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-
-	return nil
+	return printJSON(respBody, colorEnabled(cmd))
 }
