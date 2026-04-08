@@ -8,6 +8,7 @@ import (
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
+	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -42,6 +43,10 @@ var cmdPDS = &cli.Command{
 						&cli.BoolFlag{
 							Name:  "json",
 							Usage: "print output as JSON lines",
+						},
+						&cli.BoolFlag{
+							Name:  "handles",
+							Usage: "resolve account handles",
 						},
 					},
 					Action: runPDSAccountList,
@@ -113,6 +118,7 @@ func runPDSAccountList(ctx context.Context, cmd *cli.Command) error {
 	}
 	client := atclient.NewAPIClient(pdsHost)
 	client.Headers.Set("User-Agent", userAgentString())
+	dir := identity.DefaultDirectory()
 
 	cursor := ""
 	var size int64 = 500
@@ -136,7 +142,16 @@ func runPDSAccountList(ctx context.Context, cmd *cli.Command) error {
 				} else if r.Status != nil {
 					status = *r.Status
 				}
-				fmt.Printf("%s\t%s\t%s\n", r.Did, status, r.Rev)
+				if cmd.Bool("handles") {
+					handle := "unknown"
+					ident, err := dir.LookupDID(ctx, syntax.DID(r.Did))
+					if err == nil {
+						handle = ident.Handle.String()
+					}
+					fmt.Printf("%s\t%s\t%s\t%s\n", r.Did, status, r.Rev, handle)
+				} else {
+					fmt.Printf("%s\t%s\t%s\n", r.Did, status, r.Rev)
+				}
 			}
 		}
 
