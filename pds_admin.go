@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -188,11 +189,35 @@ func NewPDSAdminClient(cmd *cli.Command) (*atclient.APIClient, error) {
 			}
 		}
 	}
+	host := cmd.String("pds-host")
 	if adminPass == "" {
-		return nil, fmt.Errorf("PDS admin password required")
+		// no admin password: fall back to an unauthenticated client. Some
+		// admin endpoints (eg, sync.listRepos) work without auth, and other
+		// PDS implementations may not require admin auth at all. Auth-failed
+		// responses are surfaced via maybeSuggestAdminPassword.
+		return atclient.NewAPIClient(host), nil
 	}
-	c := atclient.NewAdminClient(cmd.String("pds-host"), adminPass)
-	return c, nil
+	return atclient.NewAdminClient(host, adminPass), nil
+}
+
+// maybeSuggestAdminPassword wraps an API error with a hint to pass
+// --admin-password when the request was made without admin auth and the PDS
+// responded with an authentication/authorization failure.
+func maybeSuggestAdminPassword(cmd *cli.Command, err error) error {
+	if err == nil {
+		return nil
+	}
+	if cmd.String("admin-password") != "" {
+		return err
+	}
+	var apiErr *atclient.APIError
+	if !errors.As(err, &apiErr) {
+		return err
+	}
+	if apiErr.StatusCode != 401 && apiErr.StatusCode != 403 {
+		return err
+	}
+	return fmt.Errorf("%w\n\nThis PDS may require admin auth; try passing --admin-password or setting PDS_ADMIN_PASSWORD", err)
 }
 
 func runPDSAdminAccountTakedown(ctx context.Context, cmd *cli.Command) error {
@@ -226,7 +251,7 @@ func runPDSAdminAccountTakedown(ctx context.Context, cmd *cli.Command) error {
 		},
 	})
 
-	return err
+	return maybeSuggestAdminPassword(cmd, err)
 }
 
 func runPDSAdminAccountList(ctx context.Context, cmd *cli.Command) error {
@@ -241,7 +266,7 @@ func runPDSAdminAccountList(ctx context.Context, cmd *cli.Command) error {
 	for {
 		resp, err := comatproto.SyncListRepos(ctx, client, cursor, size)
 		if err != nil {
-			return err
+			return maybeSuggestAdminPassword(cmd, err)
 		}
 
 		for _, r := range resp.Repos {
@@ -286,9 +311,9 @@ func runPDSAdminAccountDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return comatproto.AdminDeleteAccount(ctx, client, &comatproto.AdminDeleteAccount_Input{
+	return maybeSuggestAdminPassword(cmd, comatproto.AdminDeleteAccount(ctx, client, &comatproto.AdminDeleteAccount_Input{
 		Did: did.String(),
-	})
+	}))
 }
 
 func runPDSAdminAccountInfo(ctx context.Context, cmd *cli.Command) error {
@@ -309,7 +334,7 @@ func runPDSAdminAccountInfo(ctx context.Context, cmd *cli.Command) error {
 
 	r, err := comatproto.AdminGetAccountInfo(ctx, client, did.String())
 	if err != nil {
-		return err
+		return maybeSuggestAdminPassword(cmd, err)
 	}
 	b, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
@@ -342,7 +367,7 @@ func runPDSAdminAccountUpdate(ctx context.Context, cmd *cli.Command) error {
 			Email:   email,
 		})
 		if err != nil {
-			return err
+			return maybeSuggestAdminPassword(cmd, err)
 		}
 		fmt.Println("updated email")
 	}
@@ -359,7 +384,7 @@ func runPDSAdminAccountUpdate(ctx context.Context, cmd *cli.Command) error {
 			Handle: handle,
 		})
 		if err != nil {
-			return err
+			return maybeSuggestAdminPassword(cmd, err)
 		}
 		fmt.Println("updated handle")
 	}
@@ -389,7 +414,7 @@ func runPDSAdminAccountResetPassword(ctx context.Context, cmd *cli.Command) erro
 		Password: password,
 	})
 	if err != nil {
-		return err
+		return maybeSuggestAdminPassword(cmd, err)
 	}
 	fmt.Printf("new password: %s\n", password)
 
@@ -419,7 +444,7 @@ func runPDSAdminBlobStatus(ctx context.Context, cmd *cli.Command) error {
 
 	resp, err := comatproto.AdminGetSubjectStatus(ctx, client, blobCID, did.String(), "")
 	if err != nil {
-		return err
+		return maybeSuggestAdminPassword(cmd, err)
 	}
 	b, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
@@ -465,7 +490,7 @@ func runPDSAdminBlobPurge(ctx context.Context, cmd *cli.Command) error {
 			// NOTE: should ref be datetime?
 		},
 	})
-	return err
+	return maybeSuggestAdminPassword(cmd, err)
 }
 
 func runPDSAdminCreateInvites(ctx context.Context, cmd *cli.Command) error {
@@ -480,7 +505,7 @@ func runPDSAdminCreateInvites(ctx context.Context, cmd *cli.Command) error {
 			UseCount: int64(cmd.Int("uses")),
 		})
 		if err != nil {
-			return err
+			return maybeSuggestAdminPassword(cmd, err)
 		}
 		fmt.Println(resp.Code)
 	}
@@ -497,7 +522,7 @@ func runPDSAdminAccountCreate(ctx context.Context, cmd *cli.Command) error {
 		UseCount: 1,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create invite code: %w", err)
+		return maybeSuggestAdminPassword(cmd, fmt.Errorf("failed to create invite code: %w", err))
 	}
 
 	return createAccount(ctx, cmd, inviteResp.Code)
