@@ -12,6 +12,8 @@ import (
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/earthboundkid/versioninfo/v2"
+	"github.com/ipfs/go-cid"
+	"github.com/multiformats/go-multihash"
 	"github.com/urfave/cli/v3"
 )
 
@@ -123,4 +125,13 @@ func parseDIDRef(raw string) error {
 	}
 	// TODO: more syntax checks on fragment
 	return nil
+}
+
+func computeRawCID(b []byte) (*cid.Cid, error) {
+	builder := cid.NewPrefixV1(cid.Raw, multihash.SHA2_256)
+	c, err := builder.Sum(b)
+	if err != nil {
+		return nil, err
+	}
+	return &c, err
 }

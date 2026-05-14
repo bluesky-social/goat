@@ -9,6 +9,7 @@ import (
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
+	"github.com/bluesky-social/indigo/atproto/atdata"
 
 	"github.com/urfave/cli/v3"
 )
@@ -66,6 +67,13 @@ var cmdBlob = &cli.Command{
 			ArgsUsage: `<file>`,
 			Flags:     []cli.Flag{},
 			Action:    runBlobUpload,
+		},
+		&cli.Command{
+			Name:      "compute",
+			Usage:     "hash a local file and print blob metadata",
+			ArgsUsage: `<file>`,
+			Flags:     []cli.Flag{},
+			Action:    runBlobCompute,
 		},
 	},
 }
@@ -227,6 +235,36 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	b, err := json.MarshalIndent(resp.Blob, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(b))
+	return nil
+}
+
+func runBlobCompute(ctx context.Context, cmd *cli.Command) error {
+	blobPath := cmd.Args().First()
+	if blobPath == "" {
+		return fmt.Errorf("need to provide file path as an argument")
+	}
+	fileBytes, err := os.ReadFile(blobPath)
+	if err != nil {
+		return err
+	}
+
+	cid, err := computeRawCID(fileBytes)
+	if err != nil {
+		return err
+	}
+
+	blob := atdata.Blob{
+		Ref:      atdata.CIDLink(*cid),
+		Size:     int64(len(fileBytes)),
+		MimeType: "application/octet-stream", // TODO
+	}
+
+	b, err := json.MarshalIndent(blob, "", "  ")
 	if err != nil {
 		return err
 	}
