@@ -124,18 +124,18 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 				return fmt.Errorf("invalid non-string field value: %w", err)
 			}
 			reqBody[parts[0]] = val
-		} else if strings.Contains(arg, ":") {
-			parts := strings.SplitN(arg, ":", 2)
-			if len(parts[0]) == 0 {
-				return fmt.Errorf("empty request header name")
-			}
-			req.Headers.Set(parts[0], parts[1])
 		} else if strings.Contains(arg, "=") {
 			parts := strings.SplitN(arg, "=", 2)
 			if len(parts[0]) == 0 {
 				return fmt.Errorf("empty body field name")
 			}
 			reqBody[parts[0]] = parts[1]
+		} else if strings.Contains(arg, ":") {
+			parts := strings.SplitN(arg, ":", 2)
+			if len(parts[0]) == 0 {
+				return fmt.Errorf("empty request header name")
+			}
+			req.Headers.Set(parts[0], parts[1])
 		} else {
 			return fmt.Errorf("unhandled arg syntax: %s", arg)
 		}
