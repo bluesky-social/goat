@@ -277,16 +277,19 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 
 		rawNSID, err := atdata.ExtractTypeJSON(recordBytes)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse '$type' from record data: %w", err)
+		}
+		if rawNSID == "" {
+			return fmt.Errorf("failed to parse '$type' from record data: empty or undefined")
 		}
 		nsid, err = syntax.ParseNSID(rawNSID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse '$type' from record data: %w", err)
 		}
 
 		recordData, err = atdata.UnmarshalJSON(recordBytes)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse record data: %w", err)
 		}
 	}
 
