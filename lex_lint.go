@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"slices"
 
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -32,6 +33,18 @@ var cmdLexLint = &cli.Command{
 			Value:   "lexicons/",
 			Usage:   "base directory for project Lexicon files",
 			Sources: cli.EnvVars("LEXICONS_DIR"),
+		},
+		&cli.StringSliceFlag{
+			Name:    "ignore-lint",
+			Aliases: []string{"I"},
+			Usage:   "lint rules to ignore (by short-name)",
+			Sources: cli.EnvVars("IGNORE_LINTS"),
+		},
+		&cli.StringFlag{
+			Name:    "lint-level",
+			Value:   "warn",
+			Usage:   "only print lints of the given level or higher (error, warn, info)",
+			Sources: cli.EnvVars("LINT_LEVEL"),
 		},
 		&cli.BoolFlag{
 			Name:  "json",
@@ -126,6 +139,31 @@ func lintFilePath(ctx context.Context, cmd *cli.Command, p string) error {
 			Message:         err.Error(),
 		})
 	}
+
+	// filter issues
+	filtered := make([]lexlint.LintIssue, 0, len(issues))
+	level := cmd.String("lint-level")
+	for _, iss := range issues {
+		switch iss.LintLevel {
+		case "error":
+			// always
+		case "warn":
+			if level == "error" {
+				continue
+			}
+		case "info":
+			if level == "error" || level == "warn" {
+				continue
+			}
+		default:
+			continue
+		}
+		if slices.Contains(cmd.StringSlice("ignore-lint"), iss.LintName) {
+			continue
+		}
+		filtered = append(filtered, iss)
+	}
+	issues = filtered
 
 	if cmd.Bool("json") {
 		for _, iss := range issues {
