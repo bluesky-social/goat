@@ -229,7 +229,10 @@ func runRecordCreate(ctx context.Context, cmd *cli.Command) error {
 
 	nsid, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to extract '$type' from record data: %w", err)
+	}
+	if nsid == "" {
+		return fmt.Errorf("failed to parse '$type' from record data: empty or undefined")
 	}
 
 	var rkey *string
@@ -283,7 +286,10 @@ func runRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	nsid, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to extract '$type' from record data: %w", err)
+	}
+	if nsid == "" {
+		return fmt.Errorf("failed to parse '$type' from record data: empty or undefined")
 	}
 
 	rkey := cmd.String("rkey")
