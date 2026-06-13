@@ -11,8 +11,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// this can be set at build time with: -ldflags="-X 'main.Version=X.Y.Z'"
-var Version string
+// this can be set at build time with: -ldflags="-X 'main.version=X.Y.Z'"
+var version string
 
 func main() {
 	if err := run(os.Args); err != nil {
@@ -24,8 +24,8 @@ func main() {
 func run(args []string) error {
 
 	cmdVersion := versioninfo.Short()
-	if Version != "" {
-		cmdVersion = Version
+	if version != "" {
+		cmdVersion = version
 	}
 
 	app := cli.Command{
