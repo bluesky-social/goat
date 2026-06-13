@@ -8,6 +8,8 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- 'lex lint' filtering by lint name and level
+- command to compute blob metadata for local files
 - flag to resolve handles when listing PDS accounts
 
 ### Changed
