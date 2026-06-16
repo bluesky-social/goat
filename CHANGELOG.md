@@ -11,6 +11,7 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - 'lex lint' filtering by lint name and level
 - command to compute blob metadata for local files
 - flag to resolve handles when listing PDS accounts
+- `PDS_ENV_FILE` env var to override the default `/pds/pds.env` lookup path used by `goat pds admin` for `PDS_ADMIN_PASSWORD`
 
 ### Changed
 
