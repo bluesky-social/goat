@@ -29,7 +29,14 @@ var cmdLexStatus = &cli.Command{
 }
 
 func runLexStatus(ctx context.Context, cmd *cli.Command) error {
-	return runComparisons(ctx, cmd, compareStatus)
+	err := runComparisons(ctx, cmd, compareStatus)
+	fmt.Println()
+	fmt.Println("Legend:")
+	fmt.Println(" 🟢 in sync")
+	fmt.Println(" 🟣 local and remote differ")
+	fmt.Println(" 🟠 local only (not yet published)")
+	fmt.Println(" ⭕ remote only (missing locally)")
+	return err
 }
 
 func compareStatus(ctx context.Context, cmd *cli.Command, nsid syntax.NSID, localJSON, remoteJSON json.RawMessage) error {
