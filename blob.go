@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
@@ -102,11 +103,13 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 
 	topDir := cmd.String("output")
 	if topDir == "" {
-		topDir = fmt.Sprintf("%s_blobs", username)
+		topDir = fmt.Sprintf("%s_blobs", portableFilenameComponent(username))
 	}
 
 	fmt.Printf("downloading blobs to: %s\n", topDir)
-	os.MkdirAll(topDir, os.ModePerm)
+	if err := os.MkdirAll(topDir, os.ModePerm); err != nil {
+		return err
+	}
 
 	cursor := ""
 	for {
@@ -115,7 +118,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 		for _, cidStr := range resp.Cids {
-			blobPath := topDir + "/" + cidStr
+			blobPath := filepath.Join(topDir, cidStr)
 			if _, err := os.Stat(blobPath); err == nil {
 				fmt.Printf("%s\texists\n", blobPath)
 				continue
