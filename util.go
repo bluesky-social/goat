@@ -63,6 +63,38 @@ func resolveToDID(ctx context.Context, cmd *cli.Command, s string) (syntax.DID, 
 
 const stdIOPath = "-"
 
+var portableFilenameReplacer = strings.NewReplacer(
+	"<", "_",
+	">", "_",
+	":", "_",
+	`"`, "_",
+	"/", "_",
+	`\`, "_",
+	"|", "_",
+	"?", "_",
+	"*", "_",
+)
+
+func portableFilenameComponent(name string) string {
+	name = portableFilenameReplacer.Replace(name)
+	name = strings.TrimRight(name, ". ")
+	if name == "" {
+		return "_"
+	}
+
+	base := name
+	if idx := strings.IndexRune(base, '.'); idx >= 0 {
+		base = base[:idx]
+	}
+	switch strings.ToUpper(base) {
+	case "CON", "PRN", "AUX", "NUL",
+		"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+		"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9":
+		return "_" + name
+	}
+	return name
+}
+
 func getFileOrStdin(path string) (io.Reader, error) {
 	if path == stdIOPath {
 		return os.Stdin, nil
