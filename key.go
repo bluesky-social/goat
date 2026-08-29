@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
@@ -34,6 +35,12 @@ var cmdKey = &cli.Command{
 			Usage:     "parses and outputs metadata about a public or secret key",
 			ArgsUsage: `<key>`,
 			Action:    runKeyInspect,
+		},
+		&cli.Command{
+			Name:      "decode",
+			Usage:     "decode multibase key to hex format",
+			ArgsUsage: `<multibase-key>`,
+			Action:    runKeyDecode,
 		},
 	},
 }
@@ -122,4 +129,19 @@ func runKeyInspect(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 	return fmt.Errorf("unknown key encoding or type")
+}
+
+func runKeyDecode(ctx context.Context, cmd *cli.Command) error {
+	multibaseKey := cmd.Args().First()
+	if multibaseKey == "" {
+		return fmt.Errorf("need to provide multibase key as an argument")
+	}
+
+	privKey, err := atcrypto.ParsePrivateMultibase(multibaseKey)
+	if err != nil {
+		return fmt.Errorf("failed to parse multibase key: %w", err)
+	}
+	rawBytes := privKey.Bytes()
+	fmt.Println(hex.EncodeToString(rawBytes))
+	return nil
 }
