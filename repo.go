@@ -119,7 +119,7 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 	if carPath == "" {
 		// NOTE: having the rev in the the path might be nice
 		now := time.Now().Format("20060102150405")
-		carPath = fmt.Sprintf("%s.%s.car", username, now)
+		carPath = fmt.Sprintf("%s.%s.car", portableFilenameComponent(username), now)
 	}
 	output, err := getFileOrStdout(carPath)
 	if err != nil {
