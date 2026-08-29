@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
@@ -116,11 +117,15 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 	c.Client.Timeout = 600 * time.Second
 
 	carPath := cmd.String("output")
-	if carPath == "" {
-		// NOTE: having the rev in the the path might be nice
-		now := time.Now().Format("20060102150405")
-		carPath = fmt.Sprintf("%s.%s.car", username, now)
-	}
+    if carPath == "" {
+
+		if strings.Contains(username, ":") {
+			username = strings.ReplaceAll(username, ":", "_")
+		}
+
+        now := time.Now().Format("20060102150405")
+        carPath = fmt.Sprintf("%s.%s.car", username, now)
+    }
 	output, err := getFileOrStdout(carPath)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
@@ -259,9 +264,11 @@ func runRepoUnpack(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	sanitizedDID := strings.ReplaceAll(did.String(), ":", "_")
+
 	topDir := cmd.String("output")
 	if topDir == "" {
-		topDir = did.String()
+		topDir = sanitizedDID
 	}
 	fmt.Printf("writing output to: %s\n", topDir)
 
