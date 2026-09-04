@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
+	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
 )
@@ -94,6 +97,10 @@ func runPDSDescribe(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	resp, err := comatproto.ServerDescribeServer(ctx, client)
@@ -117,6 +124,10 @@ func runPDSAccountList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 	dir := identity.DefaultDirectory()
 
@@ -184,6 +195,10 @@ func runPDSAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	r, err := comatproto.SyncGetRepoStatus(ctx, client, did.String())

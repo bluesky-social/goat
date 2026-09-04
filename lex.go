@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
@@ -14,6 +16,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
 )
@@ -184,6 +187,10 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
+	c.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	c.Headers.Set("User-Agent", userAgentString())
 	if c.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")

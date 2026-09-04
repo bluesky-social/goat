@@ -5,11 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
 )
@@ -98,6 +101,10 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	topDir := cmd.String("output")
@@ -151,6 +158,10 @@ func runBlobList(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	cursor := ""
@@ -192,6 +203,10 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	blobPath := cmd.String("output")

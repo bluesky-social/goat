@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
 	"github.com/bluesky-social/indigo/atproto/auth"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
 )
@@ -250,6 +252,10 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(ident.PDSEndpoint())
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 	if client.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
@@ -518,6 +524,10 @@ func createAccount(ctx context.Context, cmd *cli.Command, inviteCode string) err
 
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
+	client.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	client.Headers.Set("User-Agent", userAgentString())
 
 	raw = cmd.String("service-auth")

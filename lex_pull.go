@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"path"
+	"time"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
@@ -14,6 +16,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"github.com/bluesky-social/indigo/util/ssrf"
 	"tangled.org/bnewbold.net/cobalt/netclient"
 
 	"github.com/urfave/cli/v3"
@@ -156,6 +159,10 @@ func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error
 		return err
 	}
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
+	c.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 
 	cursor := ""
 	for {

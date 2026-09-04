@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/repo"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/ipfs/go-cid"
 	"github.com/urfave/cli/v3"
@@ -106,6 +108,10 @@ func runRepoExport(ctx context.Context, cmd *cli.Command) error {
 
 	// create a new API client to connect to the account's PDS
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
+	c.Client = &http.Client{
+		Timeout:   20 * time.Second,
+		Transport: ssrf.PublicOnlyTransport(),
+	}
 	c.Headers.Set("User-Agent", userAgentString())
 	if c.Host == "" {
 		return fmt.Errorf("no PDS endpoint for identity")
