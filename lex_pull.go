@@ -85,11 +85,8 @@ func pullLexicon(ctx context.Context, cmd *cli.Command, nsid syntax.NSID) error 
 
 	// TODO: common net client
 	netc := netclient.NewNetClient()
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
-	did, err := dir.ResolveNSID(ctx, nsid)
+	bdir := identity.BaseDirectory{}
+	did, err := bdir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return fmt.Errorf("failed to resolve NSID %s: %w", nsid, err)
 	}
@@ -149,12 +146,12 @@ func writeLexiconFile(ctx context.Context, cmd *cli.Command, nsid syntax.NSID, f
 func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error {
 
 	// TODO: netclient support for listing records
-	dir := identity.BaseDirectory{}
-	did, err := dir.ResolveNSID(ctx, syntax.NSID(group+"name"))
+	bdir := identity.BaseDirectory{}
+	did, err := bdir.ResolveNSID(ctx, syntax.NSID(group+"name"))
 	if err != nil {
 		return err
 	}
-	ident, err := dir.LookupDID(ctx, did)
+	ident, err := bdir.LookupDID(ctx, did)
 	if err != nil {
 		return err
 	}

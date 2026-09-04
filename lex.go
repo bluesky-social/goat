@@ -131,13 +131,9 @@ func runLexResolve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
 	if cmd.Bool("did") {
-		did, err := dir.ResolveNSID(ctx, nsid)
+		bdir := configBaseDirectory(cmd.String("plc-host"))
+		did, err := bdir.ResolveNSID(ctx, nsid)
 		if err != nil {
 			return err
 		}
@@ -145,7 +141,9 @@ func runLexResolve(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	data, err := lexicon.ResolveLexiconData(ctx, &dir, nsid)
+	dir := configDirectory(cmd.String("plc-host"))
+
+	data, err := lexicon.ResolveLexiconData(ctx, dir, nsid)
 	if err != nil {
 		return err
 	}
@@ -172,15 +170,13 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	}
 	authority := nsid.Authority()
 
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
-	did, err := dir.ResolveNSID(ctx, nsid)
+	bdir := identity.BaseDirectory{}
+	did, err := bdir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return err
 	}
 
+	dir := configDirectory(cmd.String("plc-host"))
 	ident, err := dir.LookupDID(ctx, did)
 	if err != nil {
 		return err

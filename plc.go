@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/bluesky-social/indigo/atproto/atcrypto"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util"
 
@@ -176,10 +175,7 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide account identifier as an argument")
 	}
 
-	dir := identity.BaseDirectory{
-		PLCURL:    plcHost,
-		UserAgent: userAgentString(),
-	}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 
 	id, err := syntax.ParseAtIdentifier(s)
 	if err != nil {
@@ -196,7 +192,7 @@ func runPLCHistory(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		did, err = dir.ResolveHandle(ctx, hdl)
+		did, err = bdir.ResolveHandle(ctx, hdl)
 		if err != nil {
 			return err
 		}
@@ -245,10 +241,7 @@ func runPLCData(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide account identifier as an argument")
 	}
 
-	dir := identity.BaseDirectory{
-		PLCURL:    plcHost,
-		UserAgent: userAgentString(),
-	}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 
 	id, err := syntax.ParseAtIdentifier(s)
 	if err != nil {
@@ -265,7 +258,7 @@ func runPLCData(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		did, err = dir.ResolveHandle(ctx, hdl)
+		did, err = bdir.ResolveHandle(ctx, hdl)
 		if err != nil {
 			return err
 		}

@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/earthboundkid/versioninfo/v2"
 	"github.com/ipfs/go-cid"
@@ -34,6 +37,22 @@ func configDirectory(plcHost string) identity.Directory {
 	return dir
 }
 
+// helper to configure a BaseDirectory (eg, for direct resolution w/o "lookup")
+func configBaseDirectory(plcHost string) *identity.BaseDirectory {
+	bdir := identity.BaseDirectory{
+		PLCURL: plcHost,
+		HTTPClient: http.Client{
+			Timeout:   time.Second * 20,
+			Transport: ssrf.PublicOnlyTransport(),
+		},
+		PLCClient: &http.Client{
+			Timeout: time.Second * 20,
+		},
+		UserAgent: userAgentString(),
+	}
+	return &bdir
+}
+
 func resolveIdent(ctx context.Context, cmd *cli.Command, arg string) (*identity.Identity, error) {
 	id, err := syntax.ParseAtIdentifier(arg)
 	if err != nil {
@@ -54,10 +73,7 @@ func resolveToDID(ctx context.Context, cmd *cli.Command, s string) (syntax.DID, 
 		return did, nil
 	}
 	hdl, _ := atid.AsHandle()
-	bdir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	return bdir.ResolveHandle(ctx, hdl)
 }
 

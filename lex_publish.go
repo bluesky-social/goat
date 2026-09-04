@@ -94,13 +94,10 @@ func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
+	bdir := identity.BaseDirectory{}
 	groupResolution := map[string]syntax.DID{}
 	for g := range localGroups {
-		did, err := dir.ResolveNSID(ctx, syntax.NSID(g+"name"))
+		did, err := bdir.ResolveNSID(ctx, syntax.NSID(g+"name"))
 		if err != nil {
 			continue
 		}

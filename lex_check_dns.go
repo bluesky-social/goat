@@ -51,13 +51,10 @@ func runLexCheckDNS(ctx context.Context, cmd *cli.Command) error {
 		localGroups[g] = true
 	}
 
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
+	bdir := identity.BaseDirectory{}
 	missingGroups := []string{}
 	for g := range localGroups {
-		_, err := dir.ResolveNSID(ctx, syntax.NSID(g+"name"))
+		_, err := bdir.ResolveNSID(ctx, syntax.NSID(g+"name"))
 		if err != nil {
 			missingGroups = append(missingGroups, g)
 		}

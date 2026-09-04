@@ -35,10 +35,7 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	bdir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	var raw json.RawMessage
 
 	if atid.IsDID() {

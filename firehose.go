@@ -99,14 +99,11 @@ func runFirehose(ctx context.Context, cmd *cli.Command) error {
 	slog.SetDefault(configLogger(cmd, os.Stderr))
 
 	// main thing is skipping handle verification
-	bdir := identity.BaseDirectory{
-		PLCURL:                 cmd.String("plc-host"),
-		SkipHandleVerification: true,
-		TryAuthoritativeDNS:    false,
-		SkipDNSDomainSuffixes:  []string{".bsky.social"},
-		UserAgent:              userAgentString(),
-	}
-	cdir := identity.NewCacheDirectory(&bdir, 1_000_000, time.Hour*24, time.Minute*2, time.Minute*5)
+	bdir := configBaseDirectory(cmd.String("plc-host"))
+	bdir.SkipHandleVerification = true
+	bdir.TryAuthoritativeDNS = false
+	bdir.SkipDNSDomainSuffixes = []string{".bsky.social"}
+	cdir := identity.NewCacheDirectory(bdir, 1_000_000, time.Hour*24, time.Minute*2, time.Minute*5)
 
 	gfc := GoatFirehoseConsumer{
 		OpsMode:          cmd.Bool("ops"),

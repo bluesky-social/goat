@@ -98,16 +98,14 @@ func resolveLexiconGroup(ctx context.Context, cmd *cli.Command, group string, re
 	slog.Debug("resolving schemas for NSID group", "group", group)
 
 	// TODO: netclient support for listing records
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
-	did, err := dir.ResolveNSID(ctx, syntax.NSID(group+"name"))
+	bdir := identity.BaseDirectory{}
+	did, err := bdir.ResolveNSID(ctx, syntax.NSID(group+"name"))
 	if err != nil {
 		// if NSID isn't registered, just skip comparison
 		slog.Warn("skipping NSID pattern which did not resolve", "group", group)
 		return nil
 	}
+	dir := configDirectory(cmd.String("plc-host"))
 	ident, err := dir.LookupDID(ctx, did)
 	if err != nil {
 		return err
