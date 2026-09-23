@@ -16,7 +16,7 @@ import (
 	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 	"tangled.org/bnewbold.net/cobalt/pdsclient"
 
-	// XXX:
+	// TODO: will end up in indigo
 	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
 
 	"github.com/urfave/cli/v3"
