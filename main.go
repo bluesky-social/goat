@@ -54,6 +54,7 @@ func run(args []string) error {
 		cmdXrpc,
 		cmdRepo,
 		cmdBlob,
+		cmdSpace,
 		cmdLex,
 		cmdAccount,
 		cmdPLC,

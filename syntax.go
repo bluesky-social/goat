@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -107,6 +108,18 @@ var cmdSyntax = &cli.Command{
 					Usage:     "validates AT-URI syntax",
 					ArgsUsage: `<uri>`,
 					Action:    runSyntaxATURICheck,
+				},
+			},
+		},
+		&cli.Command{
+			Name:  "space-uri",
+			Usage: "commands for atproto space URI syntax",
+			Commands: []*cli.Command{
+				&cli.Command{
+					Name:      "check",
+					Usage:     "validates space URI syntax",
+					ArgsUsage: `<uri>`,
+					Action:    runSyntaxSpaceURICheck,
 				},
 			},
 		},
@@ -247,6 +260,19 @@ func runSyntaxATURICheck(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide identifier as argument")
 	}
 	_, err := syntax.ParseATURI(s)
+	if err != nil {
+		return err
+	}
+	fmt.Println("valid")
+	return nil
+}
+
+func runSyntaxSpaceURICheck(ctx context.Context, cmd *cli.Command) error {
+	s := cmd.Args().First()
+	if s == "" {
+		return fmt.Errorf("need to provide identifier as argument")
+	}
+	_, err := xsyntax.ParseSpaceURI(s)
 	if err != nil {
 		return err
 	}
