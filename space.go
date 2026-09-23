@@ -9,6 +9,7 @@ var cmdSpace = &cli.Command{
 	Usage: "commands for permissioned data spaces",
 	Commands: []*cli.Command{
 		cmdSpaceRecord,
+		cmdSpaceRepo,
 		cmdSpaceSimple,
 		cmdSpaceHost,
 	},
