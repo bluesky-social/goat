@@ -7,8 +7,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/bluesky-social/indigo/api/agnostic"
-	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -27,22 +25,35 @@ var cmdSpaceRecord = &cli.Command{
 	Usage: "commands for space repo records",
 	Flags: []cli.Flag{},
 	Commands: []*cli.Command{
-		cmdSpaceRecordGet,
-		cmdSpaceRecordList,
+		&cli.Command{
+			Name:      "get",
+			Usage:     "fetch space record from the network",
+			ArgsUsage: `<space-uri>`,
+			Flags:     []cli.Flag{},
+			Action:    runSpaceRecordGet,
+		},
+		&cli.Command{
+			Name:      "ls",
+			Aliases:   []string{"list"},
+			Usage:     "list all records for a space repo",
+			ArgsUsage: `<space-ref> <repo-or-self>`,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "collection",
+					Usage: "only list records from a specific collection",
+				},
+			},
+			Action: runSpaceRecordList,
+		},
 		&cli.Command{
 			Name:      "create",
 			Usage:     "create record from JSON",
-			ArgsUsage: `<file|->`,
+			ArgsUsage: `<space-ref> <file|->`,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:    "rkey",
 					Aliases: []string{"r"},
 					Usage:   "record key",
-				},
-				&cli.BoolFlag{
-					Name:    "no-validate",
-					Aliases: []string{"n"},
-					Usage:   "tells PDS not to validate record Lexicon schema",
 				},
 			},
 			Action: runSpaceRecordCreate,
@@ -50,32 +61,8 @@ var cmdSpaceRecord = &cli.Command{
 		&cli.Command{
 			Name:      "update",
 			Usage:     "replace existing record from JSON",
-			ArgsUsage: `<file>`,
+			ArgsUsage: `<space-ref> <file>`,
 			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "rkey",
-					Aliases:  []string{"r"},
-					Required: true,
-					Usage:    "record key",
-				},
-				&cli.BoolFlag{
-					Name:    "no-validate",
-					Aliases: []string{"n"},
-					Usage:   "tells PDS not to validate record Lexicon schema",
-				},
-			},
-			Action: runSpaceRecordUpdate,
-		},
-		&cli.Command{
-			Name:  "delete",
-			Usage: "delete an existing record",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "collection",
-					Aliases:  []string{"c"},
-					Required: true,
-					Usage:    "collection (NSID)",
-				},
 				&cli.StringFlag{
 					Name:     "rkey",
 					Aliases:  []string{"r"},
@@ -83,31 +70,16 @@ var cmdSpaceRecord = &cli.Command{
 					Usage:    "record key",
 				},
 			},
-			Action: runSpaceRecordDelete,
+			Action: runSpaceRecordUpdate,
+		},
+		&cli.Command{
+			Name:      "delete",
+			Usage:     "delete an existing record",
+			ArgsUsage: `<space-ref> <collection> <rkey>`,
+			Flags:     []cli.Flag{},
+			Action:    runSpaceRecordDelete,
 		},
 	},
-}
-
-var cmdSpaceRecordGet = &cli.Command{
-	Name:      "get",
-	Usage:     "fetch space record from the network",
-	ArgsUsage: `<space-uri>`,
-	Flags:     []cli.Flag{},
-	Action:    runSpaceRecordGet,
-}
-
-var cmdSpaceRecordList = &cli.Command{
-	Name:      "ls",
-	Aliases:   []string{"list"},
-	Usage:     "list all records for a space repo",
-	ArgsUsage: `<space-ref> <repo>`,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "collection",
-			Usage: "only list records from a specific collection",
-		},
-	},
-	Action: runSpaceRecordList,
 }
 
 func runSpaceRecordGet(ctx context.Context, cmd *cli.Command) error {
@@ -171,12 +143,6 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	username := cmd.Args().Slice()[1]
-	ident, err := resolveIdent(ctx, cmd, username)
-	if err != nil {
-		return err
-	}
-	repo := ident.DID
 
 	client, err := loadAuthClient(ctx, cmd)
 	if err == ErrNoAuthSession {
@@ -186,6 +152,18 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 	}
 	user := *client.AccountDID
 	var c *atclient.APIClient
+
+	username := cmd.Args().Slice()[1]
+	var repo syntax.DID
+	if username == "self" {
+		repo = user
+	} else {
+		ident, err := resolveIdent(ctx, cmd, username)
+		if err != nil {
+			return err
+		}
+		repo = ident.DID
+	}
 
 	if user == repo {
 		c = client
@@ -224,7 +202,15 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
-	recordPath := cmd.Args().First()
+	if cmd.Args().Len() != 2 {
+		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+	}
+	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	recordPath := cmd.Args().Slice()[1]
 	if recordPath == "" {
 		return fmt.Errorf("need to provide file path or '-' for stdin as an argument")
 	}
@@ -234,6 +220,10 @@ func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
+	}
+	pc := pdsclient.PDSClient{
+		APIClient:  client,
+		AccountDID: *client.AccountDID,
 	}
 
 	inputReader, err := getFileOrStdin(recordPath)
@@ -251,42 +241,45 @@ func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	nsid, err := atdata.ExtractTypeJSON(recordBytes)
+	nsidStr, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
 		return fmt.Errorf("failed to extract '$type' from record data: %w", err)
 	}
-	if nsid == "" {
+	if nsidStr == "" {
 		return fmt.Errorf("failed to parse '$type' from record data: empty or undefined")
 	}
-
-	var rkey *string
-	if cmd.String("rkey") != "" {
-		rk, err := syntax.ParseRecordKey(cmd.String("rkey"))
-		if err != nil {
-			return err
-		}
-		s := rk.String()
-		rkey = &s
-	}
-	validate := !cmd.Bool("no-validate")
-
-	resp, err := agnostic.RepoCreateRecord(ctx, client, &agnostic.RepoCreateRecord_Input{
-		Collection: nsid,
-		Repo:       client.AccountDID.String(),
-		Record:     recordVal,
-		Rkey:       rkey,
-		Validate:   &validate,
-	})
+	nsid, err := syntax.ParseNSID(nsidStr)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%s\t%s\n", resp.Uri, resp.Cid)
+	var rkey syntax.RecordKey
+	if cmd.String("rkey") != "" {
+		rkey, err = syntax.ParseRecordKey(cmd.String("rkey"))
+		if err != nil {
+			return err
+		}
+	}
+
+	ruri, rcid, err := pc.CreateSpaceRecord(ctx, space, nsid, rkey, recordVal)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\t%s\n", ruri, rcid)
 	return nil
 }
 
 func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
-	recordPath := cmd.Args().First()
+	if cmd.Args().Len() != 2 {
+		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+	}
+	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	recordPath := cmd.Args().Slice()[1]
 	if recordPath == "" {
 		return fmt.Errorf("need to provide file path as an argument")
 	}
@@ -296,6 +289,10 @@ func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
+	}
+	pc := pdsclient.PDSClient{
+		APIClient:  client,
+		AccountDID: *client.AccountDID,
 	}
 
 	recordBytes, err := os.ReadFile(recordPath)
@@ -308,46 +305,15 @@ func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	nsid, err := atdata.ExtractTypeJSON(recordBytes)
+	nsidStr, err := atdata.ExtractTypeJSON(recordBytes)
 	if err != nil {
 		return fmt.Errorf("failed to extract '$type' from record data: %w", err)
 	}
-	if nsid == "" {
+	if nsidStr == "" {
 		return fmt.Errorf("failed to parse '$type' from record data: empty or undefined")
 	}
-
-	rkey := cmd.String("rkey")
-
-	// NOTE: need to fetch existing record CID to perform swap. this is optional in theory, but golang can't deal with "optional" and "nullable", so we always need to set this (?)
-	existing, err := agnostic.RepoGetRecord(ctx, client, "", nsid, client.AccountDID.String(), rkey)
+	nsid, err := syntax.ParseNSID(nsidStr)
 	if err != nil {
-		return err
-	}
-
-	validate := !cmd.Bool("no-validate")
-
-	resp, err := agnostic.RepoPutRecord(ctx, client, &agnostic.RepoPutRecord_Input{
-		Collection: nsid,
-		Repo:       client.AccountDID.String(),
-		Record:     recordVal,
-		Rkey:       rkey,
-		Validate:   &validate,
-		SwapRecord: existing.Cid,
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%s\t%s\n", resp.Uri, resp.Cid)
-	return nil
-}
-
-func runSpaceRecordDelete(ctx context.Context, cmd *cli.Command) error {
-
-	client, err := loadAuthClient(ctx, cmd)
-	if err == ErrNoAuthSession {
-		return fmt.Errorf("auth required, but not logged in")
-	} else if err != nil {
 		return err
 	}
 
@@ -355,18 +321,43 @@ func runSpaceRecordDelete(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	collection, err := syntax.ParseNSID(cmd.String("collection"))
+
+	rcid, err := pc.PutSpaceRecord(ctx, space, nsid, rkey, recordVal)
 	if err != nil {
 		return err
 	}
 
-	_, err = comatproto.RepoDeleteRecord(ctx, client, &comatproto.RepoDeleteRecord_Input{
-		Collection: collection.String(),
-		Repo:       client.AccountDID.String(),
-		Rkey:       rkey.String(),
-	})
+	fmt.Printf("%s\n", rcid)
+	return nil
+}
+
+func runSpaceRecordDelete(ctx context.Context, cmd *cli.Command) error {
+	if cmd.Args().Len() != 3 {
+		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+	}
+	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
-	return nil
+	collection, err := syntax.ParseNSID(cmd.Args().Slice()[1])
+	if err != nil {
+		return err
+	}
+	rkey, err := syntax.ParseRecordKey(cmd.Args().Slice()[2])
+	if err != nil {
+		return err
+	}
+
+	client, err := loadAuthClient(ctx, cmd)
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("auth required, but not logged in")
+	} else if err != nil {
+		return err
+	}
+	pc := pdsclient.PDSClient{
+		APIClient:  client,
+		AccountDID: *client.AccountDID,
+	}
+
+	return pc.DeleteSpaceRecord(ctx, space, collection, rkey)
 }
