@@ -67,7 +67,7 @@ func loadAuthSessionFile() (*AuthSession, error) {
 }
 
 func authRefreshCallback(ctx context.Context, data atclient.PasswordSessionData) {
-	fmt.Println("auth refresh callback")
+	slog.Debug("auth refresh callback called")
 	sess, _ := loadAuthSessionFile()
 	if sess == nil {
 		sess = &AuthSession{}
