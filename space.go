@@ -10,5 +10,6 @@ var cmdSpace = &cli.Command{
 	Commands: []*cli.Command{
 		cmdSpaceRecord,
 		cmdSpaceSimple,
+		cmdSpaceHost,
 	},
 }
