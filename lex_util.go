@@ -12,7 +12,6 @@ import (
 
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util/ssrf"
@@ -101,7 +100,7 @@ func resolveLexiconGroup(ctx context.Context, cmd *cli.Command, group string, re
 	slog.Debug("resolving schemas for NSID group", "group", group)
 
 	// TODO: netclient support for listing records
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	did, err := bdir.ResolveNSID(ctx, syntax.NSID(group+"name"))
 	if err != nil {
 		// if NSID isn't registered, just skip comparison
