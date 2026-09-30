@@ -265,7 +265,7 @@ func runAccountPlcAddRotationKey(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if len(plcData.RotationKeys) >= 5 {
-		fmt.Println("WARNGING: already have 5 rotation keys, which is the maximum")
+		fmt.Println("WARNING: already have 5 rotation keys, which is the maximum")
 	}
 
 	if slices.Contains(plcData.RotationKeys, newKeyStr) {

@@ -226,7 +226,7 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 		blobPath = blobCID
 	}
 
-	fmt.Printf("downloading blob to: %s\n", blobCID)
+	fmt.Printf("downloading blob to: %s\n", blobPath)
 
 	if _, err := os.Stat(blobPath); err == nil {
 		return fmt.Errorf("file exists: %s", blobPath)
