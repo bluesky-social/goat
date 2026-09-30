@@ -321,6 +321,7 @@ func runPLCDump(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
+		resp.Body.Close()
 
 		lines := strings.Split(string(respBytes), "\n")
 		if len(lines) == 0 || (len(lines) == 1 && len(lines[0]) == 0) {
