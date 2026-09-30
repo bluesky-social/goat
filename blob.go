@@ -117,6 +117,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	fmt.Printf("downloading blobs to: %s\n", topDir)
 	os.MkdirAll(topDir, os.ModePerm)
 
+	anyFailures := false
 	cursor := ""
 	for {
 		resp, err := comatproto.SyncListBlobs(ctx, client, cursor, ident.DID.String(), 500, "")
@@ -136,6 +137,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			blobBytes, err := comatproto.SyncGetBlob(ctx, client, cidStr, ident.DID.String())
 			if err != nil {
 				fmt.Printf("%s\tfailed %s\n", blobPath, err)
+				anyFailures = true
 				continue
 			}
 			if err := os.WriteFile(blobPath, blobBytes, 0666); err != nil {
@@ -148,6 +150,9 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 		} else {
 			break
 		}
+	}
+	if anyFailures {
+		return fmt.Errorf("some blob exports failed")
 	}
 	return nil
 }
