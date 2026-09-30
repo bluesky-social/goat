@@ -12,6 +12,7 @@ import (
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
+	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
@@ -122,6 +123,10 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 		for _, cidStr := range resp.Cids {
+			// verify untrusted string is actually a CID before writing to disk
+			if _, err := syntax.ParseCID(cidStr); err != nil {
+				return fmt.Errorf("invalid CID in API response: %s", cidStr)
+			}
 			blobPath := topDir + "/" + cidStr
 			if _, err := os.Stat(blobPath); err == nil {
 				fmt.Printf("%s\texists\n", blobPath)
