@@ -122,9 +122,19 @@ func loadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.APIClient,
 		return client, nil
 	}
 
-	// otherwise try new auth session using saved password
-	dir := configDirectory(cmd.String("plc-host"))
-	return atclient.LoginWithPassword(ctx, dir, sess.DID.AtIdentifier(), sess.Password, "", authRefreshCallback)
+	// otherwise try new auth session using saved password and host info
+	client, err = atclient.LoginWithPasswordHost(ctx, sess.PDS, sess.DID.String(), sess.Password, "", authRefreshCallback)
+	if err != nil {
+		return nil, err
+	}
+
+	// persist new session info to disk
+	passAuth, ok := client.Auth.(*atclient.PasswordAuth)
+	if !ok {
+		return nil, fmt.Errorf("expected password auth")
+	}
+	authRefreshCallback(ctx, passAuth.Session)
+	return client, nil
 }
 
 func wipeAuthSession() error {
