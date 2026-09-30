@@ -216,10 +216,13 @@ func runAccountPlcSubmit(ctx context.Context, cmd *cli.Command) error {
 func runAccountPlcCurrent(ctx context.Context, cmd *cli.Command) error {
 
 	client, err := loadAuthClient(ctx, cmd)
-	if err == ErrNoAuthSession || client.Auth == nil {
+	if err == ErrNoAuthSession {
 		return fmt.Errorf("auth required, but not logged in")
 	} else if err != nil {
 		return err
+	}
+	if client.Auth == nil {
+		return fmt.Errorf("auth required, but not logged in")
 	}
 
 	plcData, err := fetchPLCData(ctx, cmd.String("plc-host"), *client.AccountDID)
