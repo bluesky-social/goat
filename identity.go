@@ -35,6 +35,7 @@ func runResolve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+	atid = atid.Normalize()
 	bdir := configBaseDirectory(cmd.String("plc-host"))
 	var raw json.RawMessage
 
