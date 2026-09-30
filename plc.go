@@ -707,6 +707,7 @@ func runPLCUpdate(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
+		parsedHandle = parsedHandle.Normalize()
 
 		// strip any existing at:// akas
 		// (someone might have some non-atproto akas, we will leave them untouched,
