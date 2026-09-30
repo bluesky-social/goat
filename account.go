@@ -253,7 +253,7 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(ident.PDSEndpoint())
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -525,7 +525,7 @@ func createAccount(ctx context.Context, cmd *cli.Command, inviteCode string) err
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())

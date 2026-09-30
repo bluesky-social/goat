@@ -98,7 +98,7 @@ func runPDSDescribe(ctx context.Context, cmd *cli.Command) error {
 	}
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -125,7 +125,7 @@ func runPDSAccountList(ctx context.Context, cmd *cli.Command) error {
 	}
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -196,7 +196,7 @@ func runPDSAccountStatus(ctx context.Context, cmd *cli.Command) error {
 
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())

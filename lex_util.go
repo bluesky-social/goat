@@ -115,7 +115,7 @@ func resolveLexiconGroup(ctx context.Context, cmd *cli.Command, group string, re
 	}
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 

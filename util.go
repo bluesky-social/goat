@@ -42,11 +42,11 @@ func configBaseDirectory(plcHost string) *identity.BaseDirectory {
 	bdir := identity.BaseDirectory{
 		PLCURL: plcHost,
 		HTTPClient: http.Client{
-			Timeout:   time.Second * 20,
+			Timeout:   30 * time.Second,
 			Transport: ssrf.PublicOnlyTransport(),
 		},
 		PLCClient: &http.Client{
-			Timeout: time.Second * 20,
+			Timeout: 30 * time.Second,
 		},
 		UserAgent: userAgentString(),
 	}

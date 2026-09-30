@@ -160,7 +160,7 @@ func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error
 	}
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 

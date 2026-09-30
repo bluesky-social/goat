@@ -156,7 +156,7 @@ func runRecordList(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	c.Headers.Set("User-Agent", userAgentString())
