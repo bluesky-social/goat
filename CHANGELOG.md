@@ -14,8 +14,9 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `resolve` works correctly with un-normalized handles
 - `blob export` reports partial failure
 - resumed login sessions have new tokens persisted to disk
-- corner-case error handing with account migration
+- corner-case error handling with account migration
 - reject unsafe `blob export` file paths
+- `lex pull` wasn't passing through file write errors
 
 ### Changed
 
