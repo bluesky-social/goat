@@ -15,7 +15,7 @@ import (
 var cmdLexStatus = &cli.Command{
 	Name:        "status",
 	Usage:       "check if local lexicons are in-sync with live network",
-	Description: "Enumerates all local lexicons (JSON files), and checks for changes against the live network\nWill detect new published lexicons under a known lexicon group, but will not discover new groups under the same domain prefix.\nOperates on entire ./lexicons/ directory unless specific files or directories are provided.",
+	Description: "Enumerates all local lexicons (JSON files), and checks for changes against the live network\nWill detect new published lexicons under a known lexicon group, but will not discover new groups under the same domain prefix.\nOperates on entire ./lexicons/ directory unless specific files or directories are provided.\n\nLegend:\n 🟢 in sync\n 🟣 local and remote differ\n 🟠 local only (not yet published)\n ⭕ remote only (missing locally)",
 	ArgsUsage:   `<file-or-dir>*`,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
