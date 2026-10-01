@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
@@ -115,7 +116,9 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	fmt.Printf("downloading blobs to: %s\n", topDir)
-	os.MkdirAll(topDir, os.ModePerm)
+	if err := os.MkdirAll(topDir, os.ModePerm); err != nil {
+		return err
+	}
 
 	anyFailures := false
 	cursor := ""
@@ -129,7 +132,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			if _, err := syntax.ParseCID(cidStr); err != nil {
 				return fmt.Errorf("invalid CID in API response: %s", cidStr)
 			}
-			blobPath := topDir + "/" + cidStr
+			blobPath := filepath.Join(topDir, cidStr)
 			if _, err := os.Stat(blobPath); err == nil {
 				fmt.Printf("%s\texists\n", blobPath)
 				continue
