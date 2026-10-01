@@ -197,7 +197,7 @@ func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error
 				}
 			}
 			if err := writeLexiconFile(ctx, cmd, nsid, fpath, *rec.Value); err != nil {
-				return nil
+				return fmt.Errorf("writing lexicon to file: %w", err)
 			}
 			fmt.Printf(" 🟢 %s\n", nsid)
 		}
