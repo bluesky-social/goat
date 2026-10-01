@@ -17,6 +17,11 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - corner-case error handling with account migration
 - reject unsafe `blob export` file paths
 - `lex pull` wasn't passing through file write errors
+- exit when directory creation fails
+
+### Added
+
+- visual legend for `lex status` icons
 
 ### Changed
 
