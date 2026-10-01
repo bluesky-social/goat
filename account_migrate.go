@@ -68,6 +68,9 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	did := *oldClient.AccountDID
 	didStr := did.String()
 
+	// longer timeout
+	oldClient.Client.Timeout = 300 * time.Second
+
 	newHostURL := cmd.String("pds-host")
 	if !strings.Contains(newHostURL, "://") {
 		return fmt.Errorf("PDS host is not a url: %s", newHostURL)

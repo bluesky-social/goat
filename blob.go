@@ -251,6 +251,9 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
+
 	fileBytes, err := os.ReadFile(blobPath)
 	if err != nil {
 		return err
