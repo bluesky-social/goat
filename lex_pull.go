@@ -13,7 +13,6 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util/ssrf"
@@ -88,7 +87,7 @@ func pullLexicon(ctx context.Context, cmd *cli.Command, nsid syntax.NSID) error 
 
 	// TODO: common net client
 	netc := netclient.NewNetClient()
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	did, err := bdir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return fmt.Errorf("failed to resolve NSID %s: %w", nsid, err)
@@ -149,7 +148,7 @@ func writeLexiconFile(ctx context.Context, cmd *cli.Command, nsid syntax.NSID, f
 func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error {
 
 	// TODO: netclient support for listing records
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	did, err := bdir.ResolveNSID(ctx, syntax.NSID(group+"name"))
 	if err != nil {
 		return err
@@ -160,7 +159,7 @@ func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error
 	}
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 
@@ -198,7 +197,7 @@ func pullLexiconGroup(ctx context.Context, cmd *cli.Command, group string) error
 				}
 			}
 			if err := writeLexiconFile(ctx, cmd, nsid, fpath, *rec.Value); err != nil {
-				return nil
+				return fmt.Errorf("writing lexicon to file: %w", err)
 			}
 			fmt.Printf(" 🟢 %s\n", nsid)
 		}

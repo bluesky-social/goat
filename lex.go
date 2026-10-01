@@ -13,7 +13,6 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/lexicon"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util/ssrf"
@@ -173,7 +172,7 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	}
 	authority := nsid.Authority()
 
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	did, err := bdir.ResolveNSID(ctx, nsid)
 	if err != nil {
 		return err
@@ -188,7 +187,7 @@ func runLexList(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	c.Headers.Set("User-Agent", userAgentString())
@@ -236,10 +235,7 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 
 	var nsid syntax.NSID
 	var recordData map[string]any
-	dir := identity.BaseDirectory{
-		PLCURL:    cmd.String("plc-host"),
-		UserAgent: userAgentString(),
-	}
+	dir := configBaseDirectory(cmd.String("plc-host"))
 	cat := lexicon.NewResolvingCatalog()
 
 	var flags lexicon.ValidateFlags = 0

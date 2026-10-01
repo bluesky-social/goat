@@ -68,6 +68,9 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	did := *oldClient.AccountDID
 	didStr := did.String()
 
+	// longer timeout
+	oldClient.Client.Timeout = 300 * time.Second
+
 	newHostURL := cmd.String("pds-host")
 	if !strings.Contains(newHostURL, "://") {
 		return fmt.Errorf("PDS host is not a url: %s", newHostURL)
@@ -200,6 +203,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 			_, err = comatproto.RepoUploadBlob(ctx, newClient, bytes.NewReader(blobBytes))
 			if err != nil {
 				slog.Warn("failed uploading blob", "cid", blobCID, "err", err, "size", len(blobBytes))
+				continue
 			}
 			slog.Info("transferred blob", "cid", blobCID, "size", len(blobBytes))
 		}
@@ -227,7 +231,7 @@ func runAccountMigrate(ctx context.Context, cmd *cli.Command) error {
 	}
 	credsBytes, err := json.Marshal(credsResp)
 	if err != nil {
-		return nil
+		return fmt.Errorf("failed fetching new credentials: %w", err)
 	}
 
 	var unsignedOp agnostic.IdentitySignPlcOperation_Input

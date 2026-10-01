@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -51,7 +50,7 @@ func runLexCheckDNS(ctx context.Context, cmd *cli.Command) error {
 		localGroups[g] = true
 	}
 
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	missingGroups := []string{}
 	for g := range localGroups {
 		_, err := bdir.ResolveNSID(ctx, syntax.NSID(g+"name"))

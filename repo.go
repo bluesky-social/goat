@@ -158,6 +158,9 @@ func runRepoImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
+
 	fileBytes, err := os.ReadFile(carPath)
 	if err != nil {
 		return err
