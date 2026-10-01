@@ -42,7 +42,7 @@ func runBskyPrefsExport(ctx context.Context, cmd *cli.Command) error {
 	// TODO: does indigo API code crash with unsupported preference '$type'? Eg "Lexicon decoder" with unsupported type.
 	resp, err := agnostic.ActorGetPreferences(ctx, client)
 	if err != nil {
-		return fmt.Errorf("failed fetching old preferences: %w", err)
+		return fmt.Errorf("failed fetching bsky preferences: %w", err)
 	}
 
 	b, err := json.MarshalIndent(resp.Preferences, "", "  ")
@@ -81,7 +81,7 @@ func runBskyPrefsImport(ctx context.Context, cmd *cli.Command) error {
 		Preferences: prefsArray,
 	})
 	if err != nil {
-		return fmt.Errorf("failed fetching old preferences: %w", err)
+		return fmt.Errorf("failed importing bsky preferences: %w", err)
 	}
 
 	return nil

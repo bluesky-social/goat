@@ -413,7 +413,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 			logger.Error("invalid path in repo op", "eventKind", op.Action, "path", op.Path)
 			return nil
 		}
-		logger = logger.With("eventKind", op.Action, "collection", collection, "rkey", rkey)
+		oplogger := logger.With("eventKind", op.Action, "collection", collection, "rkey", rkey)
 
 		if len(gfc.CollectionFilter) > 0 {
 			keep := slices.Contains(gfc.CollectionFilter, collection.String())
@@ -438,18 +438,18 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 			// read the record bytes from blocks, and verify CID
 			recBytes, rc, err := rr.GetRecordBytes(ctx, coll, rkey)
 			if err != nil {
-				logger.Error("reading record from event blocks (CAR)", "err", err)
+				oplogger.Error("reading record from event blocks (CAR)", "err", err)
 				break
 			}
 			if op.Cid == nil || lexutil.LexLink(*rc) != *op.Cid {
-				logger.Error("mismatch between commit op CID and record block", "recordCID", rc, "opCID", op.Cid)
+				oplogger.Error("mismatch between commit op CID and record block", "recordCID", rc, "opCID", op.Cid)
 				break
 			}
 
 			out["action"] = op.Action
 			d, err := atdata.UnmarshalCBOR(recBytes)
 			if err != nil {
-				slog.Warn("failed to parse record CBOR")
+				oplogger.Warn("failed to parse record CBOR")
 				continue
 			}
 			out["cid"] = op.Cid.String()
@@ -471,7 +471,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 				fmt.Println(string(b))
 			}
 		default:
-			logger.Error("unexpected record op kind")
+			oplogger.Error("unexpected record op kind")
 		}
 	}
 	return nil

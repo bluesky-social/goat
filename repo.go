@@ -158,6 +158,9 @@ func runRepoImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
+
 	fileBytes, err := os.ReadFile(carPath)
 	if err != nil {
 		return err
@@ -268,8 +271,10 @@ func runRepoUnpack(ctx context.Context, cmd *cli.Command) error {
 	fmt.Printf("writing output to: %s\n", topDir)
 
 	// first the commit object as a meta file
-	commitPath := topDir + "/_commit.json"
-	os.MkdirAll(filepath.Dir(commitPath), os.ModePerm)
+	commitPath := filepath.Join(topDir, "_commit.json")
+	if err := os.MkdirAll(filepath.Dir(commitPath), os.ModePerm); err != nil {
+		return err
+	}
 	commitJSON, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err

@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
@@ -94,7 +96,15 @@ func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.API
 		if err != nil {
 			return nil, err
 		}
-		return atclient.LoginWithPassword(ctx, dir, atid, password, "", nil)
+		client, err := atclient.LoginWithPassword(ctx, dir, atid, password, "", nil)
+		if err != nil {
+			return nil, err
+		}
+		client.Headers.Set("User-Agent", userAgentString())
+		client.Client = &http.Client{
+			Timeout: 30 * time.Second,
+		}
+		return client, nil
 	}
 
 	// otherwise try loading from disk
@@ -116,15 +126,35 @@ func loadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.APIClient,
 		Host:         sess.PDS,
 	}, authRefreshCallback)
 
+	// configure user agent and default timeout
+	client.Headers.Set("User-Agent", userAgentString())
+	client.Client = &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
 	// check that auth is working
 	_, err = comatproto.ServerGetSession(ctx, client)
 	if nil == err {
 		return client, nil
 	}
 
-	// otherwise try new auth session using saved password
-	dir := configDirectory(cmd.String("plc-host"))
-	return atclient.LoginWithPassword(ctx, dir, sess.DID.AtIdentifier(), sess.Password, "", authRefreshCallback)
+	// otherwise try new auth session using saved password and host info
+	client, err = atclient.LoginWithPasswordHost(ctx, sess.PDS, sess.DID.String(), sess.Password, "", authRefreshCallback)
+	if err != nil {
+		return nil, err
+	}
+	client.Headers.Set("User-Agent", userAgentString())
+	client.Client = &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// persist new session info to disk
+	passAuth, ok := client.Auth.(*atclient.PasswordAuth)
+	if !ok {
+		return nil, fmt.Errorf("expected password auth")
+	}
+	authRefreshCallback(ctx, passAuth.Session)
+	return client, nil
 }
 
 func wipeAuthSession() error {

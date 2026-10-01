@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
+	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/bluesky-social/indigo/util/ssrf"
 
 	"github.com/urfave/cli/v3"
@@ -102,7 +104,8 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		// longer for big blobs
+		Timeout:   300 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -113,8 +116,11 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	fmt.Printf("downloading blobs to: %s\n", topDir)
-	os.MkdirAll(topDir, os.ModePerm)
+	if err := os.MkdirAll(topDir, os.ModePerm); err != nil {
+		return err
+	}
 
+	anyFailures := false
 	cursor := ""
 	for {
 		resp, err := comatproto.SyncListBlobs(ctx, client, cursor, ident.DID.String(), 500, "")
@@ -122,7 +128,11 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 		for _, cidStr := range resp.Cids {
-			blobPath := topDir + "/" + cidStr
+			// verify untrusted string is actually a CID before writing to disk
+			if _, err := syntax.ParseCID(cidStr); err != nil {
+				return fmt.Errorf("invalid CID in API response: %s", cidStr)
+			}
+			blobPath := filepath.Join(topDir, cidStr)
 			if _, err := os.Stat(blobPath); err == nil {
 				fmt.Printf("%s\texists\n", blobPath)
 				continue
@@ -130,6 +140,7 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 			blobBytes, err := comatproto.SyncGetBlob(ctx, client, cidStr, ident.DID.String())
 			if err != nil {
 				fmt.Printf("%s\tfailed %s\n", blobPath, err)
+				anyFailures = true
 				continue
 			}
 			if err := os.WriteFile(blobPath, blobBytes, 0666); err != nil {
@@ -142,6 +153,9 @@ func runBlobExport(ctx context.Context, cmd *cli.Command) error {
 		} else {
 			break
 		}
+	}
+	if anyFailures {
+		return fmt.Errorf("some blob exports failed")
 	}
 	return nil
 }
@@ -159,7 +173,7 @@ func runBlobList(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(ident.PDSEndpoint())
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -204,7 +218,8 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		// longer for big blobs
+		Timeout:   300 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -214,7 +229,7 @@ func runBlobDownload(ctx context.Context, cmd *cli.Command) error {
 		blobPath = blobCID
 	}
 
-	fmt.Printf("downloading blob to: %s\n", blobCID)
+	fmt.Printf("downloading blob to: %s\n", blobPath)
 
 	if _, err := os.Stat(blobPath); err == nil {
 		return fmt.Errorf("file exists: %s", blobPath)
@@ -238,6 +253,9 @@ func runBlobUpload(ctx context.Context, cmd *cli.Command) error {
 	} else if err != nil {
 		return err
 	}
+
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
 
 	fileBytes, err := os.ReadFile(blobPath)
 	if err != nil {

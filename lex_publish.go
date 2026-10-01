@@ -10,7 +10,6 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
-	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
 	"github.com/urfave/cli/v3"
@@ -94,7 +93,7 @@ func runLexPublish(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	bdir := identity.BaseDirectory{}
+	bdir := configBaseDirectory(cmd.String("plc-host"))
 	groupResolution := map[string]syntax.DID{}
 	for g := range localGroups {
 		did, err := bdir.ResolveNSID(ctx, syntax.NSID(g+"name"))

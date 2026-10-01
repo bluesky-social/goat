@@ -48,7 +48,7 @@ var cmdAccount = &cli.Command{
 				},
 				&cli.StringFlag{
 					Name:    "pds-host",
-					Usage:   "URL of the PDS to create account on (overrides DID doc)",
+					Usage:   "URL of the PDS host (optional, overrides DID doc)",
 					Sources: cli.EnvVars("ATP_PDS_HOST"),
 				},
 			},
@@ -253,7 +253,7 @@ func runAccountStatus(ctx context.Context, cmd *cli.Command) error {
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(ident.PDSEndpoint())
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())
@@ -420,7 +420,7 @@ func runAccountServiceAuth(ctx context.Context, cmd *cli.Command) error {
 
 	resp, err := comatproto.ServerGetServiceAuth(ctx, client, aud, expTimestamp, lxm)
 	if err != nil {
-		return fmt.Errorf("failed updating handle: %w", err)
+		return fmt.Errorf("failed requesting service auth: %w", err)
 	}
 
 	fmt.Println(resp.Token)
@@ -525,7 +525,7 @@ func createAccount(ctx context.Context, cmd *cli.Command, inviteCode string) err
 	// create a new API client to connect to the account's PDS
 	client := atclient.NewAPIClient(pdsHost)
 	client.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	client.Headers.Set("User-Agent", userAgentString())

@@ -20,7 +20,7 @@ func fetchRecord(ctx context.Context, ident identity.Identity, aturi syntax.ATUR
 	slog.Debug("fetching record", "did", ident.DID.String(), "collection", aturi.Collection().String(), "rkey", aturi.RecordKey().String())
 	c := atclient.NewAPIClient(ident.PDSEndpoint())
 	c.Client = &http.Client{
-		Timeout:   20 * time.Second,
+		Timeout:   30 * time.Second,
 		Transport: ssrf.PublicOnlyTransport(),
 	}
 	c.Headers.Set("User-Agent", userAgentString())

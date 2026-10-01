@@ -4,6 +4,29 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## UNRELEASED
+
+### Fixed
+
+- `plc dump` HTTP response cleanup in loop
+- corrected multiple error and warning messages
+- consistent PLC configuration with `lex` commands
+- `resolve` works correctly with un-normalized handles
+- `blob export` reports partial failure
+- resumed login sessions have new tokens persisted to disk
+- corner-case error handling with account migration
+- reject unsafe `blob export` file paths
+- `lex pull` wasn't passing through file write errors
+- exit when directory creation fails
+
+### Added
+
+- visual legend for `lex status` icons
+
+### Changed
+
+- tweaked API timeouts, now defaulting to 30 seconds
+
 ## [0.2.5] - 2026-09-22
 
 ### Changed
