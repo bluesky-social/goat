@@ -15,10 +15,10 @@ require (
 	github.com/ipfs/go-ipld-format v0.6.2
 	github.com/joho/godotenv v1.5.1
 	github.com/multiformats/go-multihash v0.2.3
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/urfave/cli/v3 v3.14.0
 	github.com/xlab/treeprint v1.2.0
 	github.com/yudai/gojsondiff v1.0.0
-	golang.org/x/term v0.45.0
+	golang.org/x/term v0.46.0
 	tangled.org/bnewbold.net/cobalt v0.0.0-20251130012119-37226a9573e6
 )
 
@@ -87,9 +87,8 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
