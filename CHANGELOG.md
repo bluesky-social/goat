@@ -26,6 +26,8 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - tweaked API timeouts, now defaulting to 30 seconds
+- updated indigo dependency (several bugfixes)
+- updated urfave/cli/v3 dependency
 
 ## [0.2.5] - 2026-09-22
 
