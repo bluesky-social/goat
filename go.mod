@@ -6,7 +6,7 @@ toolchain go1.27.1
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/bluesky-social/indigo v0.0.0-20261008014919-bb8aeaa2b189
+	github.com/bluesky-social/indigo v0.0.0-20261013002844-ce54c42cbda9
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
@@ -72,7 +72,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.63.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/rivo/uniseg v0.1.0 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect
@@ -87,11 +87,12 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/time v0.15.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/time v0.16.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
-	gorm.io/gorm v1.25.9 // indirect
+	gorm.io/gorm v1.31.2 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
