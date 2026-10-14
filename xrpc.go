@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"strings"
@@ -26,6 +27,11 @@ var cmdXrpc = &cli.Command{
 			Name:    "admin-password",
 			Usage:   "admin password (for admin auth calls)",
 			Sources: cli.EnvVars("ADMIN_PASSWORD", "ATP_AUTH_ADMIN_PASSWORD"),
+		},
+		&cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+			Usage:   "write the raw response body to a file (use '-' for stdout, including terminals)",
 		},
 	},
 	Action: runXrpc,
@@ -172,6 +178,34 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 			return &atclient.APIError{StatusCode: resp.StatusCode}
 		}
 		return eb.APIError(resp.StatusCode)
+	}
+
+	if cmd.IsSet("output") {
+		outputPath := cmd.String("output")
+		if outputPath == "-" {
+			_, err := io.Copy(os.Stdout, resp.Body)
+			return err
+		}
+		output, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("creating output file: %w", err)
+		}
+		_, copyErr := io.Copy(output, resp.Body)
+		closeErr := output.Close()
+		if copyErr != nil {
+			return copyErr
+		}
+		return closeErr
+	}
+
+	mediaType, _, _ := strings.Cut(resp.Header.Get("Content-Type"), ";")
+	mediaType = strings.ToLower(strings.TrimSpace(mediaType))
+	if mediaType != "" && mediaType != "application/json" && !strings.HasSuffix(mediaType, "+json") {
+		if term.IsTerminal(int(os.Stdout.Fd())) {
+			return fmt.Errorf("Warning: Binary output (%s) can mess up your terminal. Use \"--output -\" to output it to your terminal anyway, or \"--output <FILE>\" to save to a file", mediaType)
+		}
+		_, err := io.Copy(os.Stdout, resp.Body)
+		return err
 	}
 
 	// only if TTY output...

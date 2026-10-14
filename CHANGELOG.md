@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- `xrpc` streams non-JSON responses unchanged to redirected stdout instead of attempting to decode them as JSON; warns with the MIME type before refusing non-JSON output to terminals unless explicitly allowed
+
+### Added
+
+- `xrpc -o/--output FILE` saves the raw response body; `-o -` writes raw output to stdout, including terminals
+
 ## [0.2.6] - 2026-10-12
 
 ### Fixed
