@@ -67,6 +67,10 @@ var cmdLex = &cli.Command{
 					Aliases: []string{"c"},
 					Usage:   "path to directory of Lexicon files",
 				},
+				&cli.BoolFlag{
+					Name:  "no-resolve",
+					Usage: "do not resolve a lexicon",
+				},
 			},
 			Action: runLexValidate,
 		},
@@ -236,18 +240,40 @@ func runLexValidate(ctx context.Context, cmd *cli.Command) error {
 	var nsid syntax.NSID
 	var recordData map[string]any
 	dir := configBaseDirectory(cmd.String("plc-host"))
-	cat := lexicon.NewResolvingCatalog()
+	var cat lexicon.Catalog
+	noResolve := cmd.Bool("no-resolve")
+	catalogDir := cmd.String("catalog")
+
+	if noResolve && catalogDir == "" {
+		return fmt.Errorf("option --no-resolve requires option --catalog")
+	}
+
+	if noResolve {
+		c := lexicon.NewBaseCatalog()
+		cat = c
+	} else {
+		c := lexicon.NewResolvingCatalog()
+		cat = c
+	}
 
 	var flags lexicon.ValidateFlags = 0
 	if cmd.Bool("allow-legacy-blob") {
 		flags |= lexicon.AllowLegacyBlob
 	}
 
-	if cmd.String("catalog") != "" {
+	if catalogDir != "" {
 		fmt.Printf("loading catalog directory: %s\n", cmd.String("catalog"))
-		if err := cat.Base.LoadDirectory(cmd.String("catalog")); err != nil {
-			return err
+		switch c := cat.(type) {
+		case *lexicon.ResolvingCatalog:
+			if err := c.Base.LoadDirectory(catalogDir); err != nil {
+				return err
+			}
+		case *lexicon.BaseCatalog:
+			if err := c.LoadDirectory(catalogDir); err != nil {
+				return err
+			}
 		}
+
 	}
 
 	// fetch from network if an AT-URI
