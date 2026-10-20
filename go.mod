@@ -2,7 +2,7 @@ module github.com/bluesky-social/goat
 
 go 1.27
 
-toolchain go1.27.1
+toolchain go1.27.3
 
 require (
 	github.com/adrg/xdg v0.5.3
