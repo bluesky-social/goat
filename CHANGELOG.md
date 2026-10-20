@@ -4,11 +4,12 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.2.7] - 2026-10-20
 
 ### Fixed
 
 - `xrpc` streams non-JSON responses unchanged to redirected stdout instead of attempting to decode them as JSON; warns with the MIME type before refusing non-JSON output to terminals unless explicitly allowed
+- updated go toolchain to v1.27.3 for [CVE-2026-111943](https://emudhra.we-have-a-problem.com/)
 
 ### Added
 
