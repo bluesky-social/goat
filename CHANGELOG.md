@@ -4,6 +4,12 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.8] - 2026-10-26
+
+### Fixed
+
+- bump indigo dependency, bringing patches for working with untrusted firehose and CAR files
+
 ## [0.2.7] - 2026-10-20
 
 ### Fixed
