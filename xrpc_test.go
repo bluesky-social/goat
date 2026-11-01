@@ -6,7 +6,51 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func TestSplitReqArg(t *testing.T) {
+	assert := assert.New(t)
+
+	testCases := []struct{
+		arg string
+		sep string
+		key string
+		val string
+	}{
+		{"a=b", "=", "a", "b"},
+		{"a:b", ":", "a", "b"},
+		{"a==b", "==", "a", "b"},
+		{"a:=b", ":=", "a", "b"},
+		{"a=", "=", "a", ""},
+		{"a:", ":", "a", ""},
+		{"a==", "==", "a", ""},
+		{"a:=", ":=", "a", ""},
+		{"=b", "", "", ""},
+		{":b", "", "", ""},
+		{"==b", "", "", ""},
+		{":=b", "", "", ""},
+		{"a.b", "", "", ""},
+		{"a=:b", "=", "a", ":b"},
+		{"a:===b", ":=", "a", "==b"},
+		{"a:b=c", ":", "a", "b=c"},
+		{"a:=b=c", ":=", "a", "b=c"},
+		{"a==b=c", "==", "a", "b=c"},
+		{"a=b:c", "=", "a", "b:c"},
+		{"kéééy=val", "=", "kéééy", "val"},
+	}
+
+	for _, tc := range testCases {
+		sep, key, val := splitReqArg(tc.arg)
+		assert.Equal(tc.sep, sep)
+		if tc.sep == "" {
+			continue
+		}
+		assert.Equal(tc.key, key)
+		assert.Equal(tc.val, val)
+	}
+}
 
 func TestXrpcResponseBody(t *testing.T) {
 	for _, tc := range []struct {

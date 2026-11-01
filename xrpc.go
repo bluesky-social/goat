@@ -104,7 +104,6 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 			reqStdin = true
 			continue
 		}
-		// TODO: all this pattern matching is informal and not correct in corner-cases
 		if strings.HasPrefix(arg, "@") {
 			p, _ := strings.CutPrefix(arg, "@")
 			b, err := os.ReadFile(p)
@@ -114,35 +113,23 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 			if err := json.NewDecoder(bytes.NewReader(b)).Decode(&reqBody); err != nil {
 				return fmt.Errorf("invalid JSON file contents: %w", err)
 			}
-		} else if strings.Contains(arg, "==") {
-			parts := strings.SplitN(arg, "==", 2)
-			if len(parts[0]) == 0 {
-				return fmt.Errorf("empty query parameter name")
-			}
-			params.Add(parts[0], parts[1])
-		} else if strings.Contains(arg, ":=") {
-			parts := strings.SplitN(arg, ":=", 2)
-			if len(parts[0]) == 0 {
-				return fmt.Errorf("empty body field name")
-			}
-			var val any
-			if err := json.NewDecoder(bytes.NewReader([]byte(parts[1]))).Decode(&val); err != nil {
+		}
+
+		separator, argKey, argVal := splitReqArg(arg)
+		switch separator {
+		case "==":
+			params.Add(argKey, argVal)
+		case ":=":
+			var jsonVal any
+			if err := json.NewDecoder(bytes.NewReader([]byte(argVal))).Decode(&jsonVal); err != nil {
 				return fmt.Errorf("invalid non-string field value: %w", err)
 			}
-			reqBody[parts[0]] = val
-		} else if strings.Contains(arg, "=") {
-			parts := strings.SplitN(arg, "=", 2)
-			if len(parts[0]) == 0 {
-				return fmt.Errorf("empty body field name")
-			}
-			reqBody[parts[0]] = parts[1]
-		} else if strings.Contains(arg, ":") {
-			parts := strings.SplitN(arg, ":", 2)
-			if len(parts[0]) == 0 {
-				return fmt.Errorf("empty request header name")
-			}
-			req.Headers.Set(parts[0], parts[1])
-		} else {
+			reqBody[argKey] = jsonVal
+		case "=":
+			reqBody[argKey] = argVal
+		case ":":
+			req.Headers.Set(argKey, argVal)
+		default:
 			return fmt.Errorf("unhandled arg syntax: %s", arg)
 		}
 	}
@@ -231,4 +218,30 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 	fmt.Println(string(b))
 
 	return nil
+}
+
+// takes an httpie-style CLI arg and parses it into: separator, key, value
+//
+// returns all empty strings if no separator found, or no key before separator. empty value is allowed
+func splitReqArg(arg string) (string, string, string) {
+	if strings.HasPrefix(arg, ":") || strings.HasPrefix(arg, "=") {
+		return "", "", ""
+	}
+	for i := range len(arg) {
+		switch arg[i] {
+		case ':':
+			if len(arg) >= i+2 && arg[i+1] == '=' {
+				return ":=", arg[:i], arg[i+2:]
+			}
+			return ":", arg[:i], arg[i+1:]
+		case '=':
+			if len(arg) >= i+2 && arg[i+1] == '=' {
+				return "==", arg[:i], arg[i+2:]
+			}
+			return "=", arg[:i], arg[i+1:]
+		default:
+			continue
+		}
+	}
+	return "", "", ""
 }
