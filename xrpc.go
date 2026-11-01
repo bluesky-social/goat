@@ -113,6 +113,7 @@ func runXrpc(ctx context.Context, cmd *cli.Command) error {
 			if err := json.NewDecoder(bytes.NewReader(b)).Decode(&reqBody); err != nil {
 				return fmt.Errorf("invalid JSON file contents: %w", err)
 			}
+			continue
 		}
 
 		separator, argKey, argVal := splitReqArg(arg)
