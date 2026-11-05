@@ -39,6 +39,8 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/hyphacoop/cbor/v2 v2.0.0-20251007204234-2a4fa83e606e // indirect
+	github.com/hyphacoop/go-dasl v0.8.0 // indirect
 	github.com/ipfs/bbloom v0.1.0 // indirect
 	github.com/ipfs/boxo v0.40.0 // indirect
 	github.com/ipfs/go-block-format v0.2.3 // indirect
@@ -77,6 +79,7 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	gitlab.com/yawning/secp256k1-voi v0.0.0-20230925100816-f2616030848b // indirect
 	gitlab.com/yawning/tuplehash v0.0.0-20230713102510-df83abbf9a02 // indirect

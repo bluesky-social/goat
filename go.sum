@@ -69,6 +69,10 @@ github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
 github.com/huin/goupnp v1.3.0 h1:UvLUlWDNpoUdYzb2TCn+MuTWtcjXKSza2n6CBdQ0xXc=
 github.com/huin/goupnp v1.3.0/go.mod h1:gnGPsThkYa7bFi/KWmEysQRf48l2dvR5bxr2OFckNX8=
+github.com/hyphacoop/cbor/v2 v2.0.0-20251007204234-2a4fa83e606e h1:4HqTNG0M8I/MYfra5Vn+4XAnuaivNqMuKpZu0B5hZjQ=
+github.com/hyphacoop/cbor/v2 v2.0.0-20251007204234-2a4fa83e606e/go.mod h1:1ny0WdocVllO4iUxV5eXuJ9vMzmZ2nITeZg7uBxVEeU=
+github.com/hyphacoop/go-dasl v0.8.0 h1:0K2nvGLUb8aBqG8GGUDbMgqCG9IVPT38hnpCVpzMCIU=
+github.com/hyphacoop/go-dasl v0.8.0/go.mod h1:6Z8cAEAsv495mgxatpgIdEcJxDBc7Nbg/ZJX58iGJfU=
 github.com/ipfs/bbloom v0.1.0 h1:nIWwfIE3AaG7RCDQIsrUonGCOTp7qSXzxH7ab/ss964=
 github.com/ipfs/bbloom v0.1.0/go.mod h1:lDy3A3i6ndgEW2z1CaRFvDi5/ZTzgM1IxA/pkL7Wgts=
 github.com/ipfs/boxo v0.40.0 h1:AXbum7U+aVWqSdZ5RSvKFAmrwUSxOCHyDYEIkpmb23g=
@@ -248,6 +252,8 @@ github.com/whyrusleeping/cbor v0.0.0-20171005072247-63513f603b11 h1:5HZfQkwe0mIf
 github.com/whyrusleeping/cbor v0.0.0-20171005072247-63513f603b11/go.mod h1:Wlo/SzPmxVp6vXpGt/zaXhHH0fn4IxgqZc82aKg6bpQ=
 github.com/whyrusleeping/cbor-gen v0.3.1 h1:82ioxmhEYut7LBVGhGq8xoRkXPLElVuh5mV67AFfdv0=
 github.com/whyrusleeping/cbor-gen v0.3.1/go.mod h1:pM99HXyEbSQHcosHc0iW7YFmwnscr+t9Te4ibko05so=
+github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
+github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 github.com/xlab/treeprint v1.2.0 h1:HzHnuAF1plUN2zGlAFHbSQP2qJ0ZAD3XF5XD7OesXRQ=
 github.com/xlab/treeprint v1.2.0/go.mod h1:gj5Gd3gPdKtR1ikdDK6fnFLdmIS0X30kTTuNd/WEJu0=
 github.com/yudai/gojsondiff v1.0.0 h1:27cbfqXLVEJ1o8I6v3y9lg8Ydm53EKqHXAOMxEGlCOA=
@@ -365,5 +371,7 @@ gorm.io/gorm v1.31.2/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
 honnef.co/go/tools v0.0.1-2019.2.3/go.mod h1:a3bituU0lyd329TUQxRnasdCoJDkEUEAqEt0JzvZhAg=
 lukechampine.com/blake3 v1.4.1 h1:I3Smz7gso8w4/TunLKec6K2fn+kyKtDxr/xcQEN84Wg=
 lukechampine.com/blake3 v1.4.1/go.mod h1:QFosUxmjB8mnrWFSNwKmvxHpfY72bmD2tQ0kBMM3kwo=
+pgregory.net/rapid v1.2.0 h1:keKAYRcjm+e1F0oAuU5F5+YPAWcyxNNRK2wud503Gnk=
+pgregory.net/rapid v1.2.0/go.mod h1:PY5XlDGj0+V1FCq0o192FdRhpKHGTRIWBgqjDBTrq04=
 tangled.org/bnewbold.net/cobalt v0.0.0-20261105063634-f4054caf3d68 h1:XRkPSqNttJmpQ4jgKEI8HXh+3WVqYOmhSOLtQ/NFsEU=
 tangled.org/bnewbold.net/cobalt v0.0.0-20261105063634-f4054caf3d68/go.mod h1:fOLGjhQDPmE7hoSLwTB/wbCQ7eEyrZZMbWiXQkRBX0M=
