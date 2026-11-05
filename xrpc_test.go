@@ -13,7 +13,7 @@ import (
 func TestSplitReqArg(t *testing.T) {
 	assert := assert.New(t)
 
-	testCases := []struct{
+	testCases := []struct {
 		arg string
 		sep string
 		key string
