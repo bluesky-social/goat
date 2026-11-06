@@ -10,6 +10,11 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - xrpc sub-command argument parsing with multiple separators in the same arg string
 
+### Added
+
+- star sub-command for DRISL STAR files
+- car sub-command for DRISL CAR files
+
 ## [0.2.8] - 2026-10-26
 
 ### Fixed
