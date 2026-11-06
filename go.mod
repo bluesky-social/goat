@@ -10,6 +10,7 @@ require (
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
+	github.com/hyphacoop/go-dasl v0.8.0
 	github.com/ipfs/go-cid v0.6.2
 	github.com/ipfs/go-ipld-cbor v0.2.1
 	github.com/ipfs/go-ipld-format v0.6.3
@@ -20,7 +21,7 @@ require (
 	github.com/xlab/treeprint v1.2.0
 	github.com/yudai/gojsondiff v1.0.0
 	golang.org/x/term v0.46.0
-	tangled.org/bnewbold.net/cobalt v0.0.0-20261105063634-f4054caf3d68
+	tangled.org/bnewbold.net/cobalt v0.0.0-20261106024146-a0b7ece6af10
 )
 
 require (
@@ -40,7 +41,6 @@ require (
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hyphacoop/cbor/v2 v2.0.0-20251007204234-2a4fa83e606e // indirect
-	github.com/hyphacoop/go-dasl v0.8.0 // indirect
 	github.com/ipfs/bbloom v0.1.0 // indirect
 	github.com/ipfs/boxo v0.40.0 // indirect
 	github.com/ipfs/go-block-format v0.2.3 // indirect
