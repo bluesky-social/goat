@@ -4,6 +4,13 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [UNRELEASED]
+
+### Fixed
+
+- firehose: include repo DID in `--ops` output
+- don't ignore provided username if password is empty
+
 ## [0.2.9] - 2026-11-05
 
 ### Fixed
