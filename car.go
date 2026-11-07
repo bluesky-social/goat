@@ -21,7 +21,7 @@ var cmdCar = &cli.Command{
 			Name:      "header",
 			Usage:     "output header object as JSON",
 			ArgsUsage: `<car-file>`,
-			Action: runCarHeader,
+			Action:    runCarHeader,
 		},
 		&cli.Command{
 			Name:      "cat",
@@ -33,7 +33,7 @@ var cmdCar = &cli.Command{
 					Usage: "includes a wrapper object with the CID value",
 				},
 			},
-			Action:    runCarCat,
+			Action: runCarCat,
 		},
 	},
 }
@@ -88,7 +88,7 @@ func runCarCat(ctx context.Context, cmd *cli.Command) error {
 		}
 		if cmd.Bool("with-cid") {
 			line := map[string]any{
-				"cid": reader.CID().String(),
+				"cid":  reader.CID().String(),
 				"data": value,
 			}
 			if err := enc.Encode(line); err != nil {
