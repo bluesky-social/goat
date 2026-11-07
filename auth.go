@@ -90,7 +90,7 @@ func loginOrLoadAuthClient(ctx context.Context, cmd *cli.Command) (*atclient.API
 	// if user/pass provided in env vars, login as emphemeral session with those
 	username := cmd.String("username")
 	password := cmd.String("password")
-	if username != "" && password != "" {
+	if username != "" {
 		dir := configDirectory(cmd.String("plc-host"))
 		atid, err := syntax.ParseAtIdentifier(username)
 		if err != nil {
