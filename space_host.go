@@ -54,7 +54,7 @@ func runSpaceHostListRepos(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 		for _, repo := range resp.Repos {
-			fmt.Printf("%s\t%s\t%s\t%x\n", repo.Did, repo.SpaceRev, repo.RepoRev, repo.Hash)
+			fmt.Printf("%s\t%s\t%s\t%x\n", repo.Did, repo.SpaceRev, repo.RepoRev, repo.Data)
 		}
 		if resp.Cursor != nil && *resp.Cursor != "" {
 			cursor = *resp.Cursor

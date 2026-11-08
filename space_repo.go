@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,13 +26,13 @@ var cmdSpaceRepo = &cli.Command{
 	Commands: []*cli.Command{
 		&cli.Command{
 			Name:      "export",
-			Usage:     "download space repo CAR file",
+			Usage:     "download space repo STAR file",
 			ArgsUsage: `<space> <repo>`,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:    "output",
 					Aliases: []string{"o"},
-					Usage:   "file path for CAR download",
+					Usage:   "file path for STAR download",
 				},
 			},
 			Action: runSpaceRepoExport,
@@ -106,13 +107,12 @@ func runSpaceRepoExport(ctx context.Context, cmd *cli.Command) error {
 	if carPath != stdIOPath {
 		fmt.Printf("downloading to: %s\n", carPath)
 	}
-	body, err := sc.GetSpaceRepoCAR(ctx, ident.DID)
+	body, err := sc.GetSpaceRepoBytes(ctx, ident.DID)
 	if err != nil {
 		// TODO: clean up file if error?
 		return err
 	}
-	defer body.Close()
-	_, err = io.Copy(output, body)
+	_, err = io.Copy(output, bytes.NewBuffer(body))
 	// TODO: clean up file if error?
 	return err
 }
