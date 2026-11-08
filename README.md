@@ -181,6 +181,24 @@ goat xrpc procedure @pds com.atproto.repo.uploadBlob Content-Type:image/png - < 
 goat xrpc procedure @pds com.atproto.repo.createRecord repo=did:plc:abc123 collection=example.nsid.record rkey=goat01 validate:=false 'record:={"text": "hello"}'
 ```
 
+JSON responses are pretty-printed, including `application/*+json` responses. If
+`Content-Type` is absent, the response is assumed to be JSON. Other response
+types are streamed unchanged to stdout; redirect to a file or pipe to save them.
+Without an output option, non-JSON responses are refused when stdout is a terminal;
+the warning includes the MIME type.
+
+Use `-o FILE` or `--output FILE` to save the raw response body, replacing any
+existing file. Use `-o -` or `--output -` to write the raw body to stdout,
+including a terminal. Explicit output options bypass JSON formatting and HTTP
+header display. Place options before the positional method and service arguments.
+
+```bash
+# save a proxied MP4 response without modifying its bytes
+goat xrpc -o clip.mp4 query 'did:web:fairway.iameli.link#streamplace' \
+  place.stream.live.getClip 'streamer==scumb.ag' \
+  'start==2026-10-13T22:42:05.114Z' 'end==2026-10-13T22:42:10.114Z'
+```
+
 ## Lexicon Development
 
 In a project directory, download some existing schemas, which will get saved as JSON files in `./lexicons/`:

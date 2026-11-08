@@ -4,7 +4,42 @@
 All notable changes to this project will be documented in this file. The format
 is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## UNRELEASED
+## [UNRELEASED]
+
+### Fixed
+
+- firehose: include repo DID in `--ops` output
+- don't ignore provided username if password is empty
+
+## [0.2.9] - 2026-11-05
+
+### Fixed
+
+- xrpc sub-command argument parsing with multiple separators in the same arg string
+
+### Added
+
+- star sub-command for DRISL STAR files
+- car sub-command for DRISL CAR files
+
+## [0.2.8] - 2026-10-26
+
+### Fixed
+
+- bump indigo dependency, bringing patches for working with untrusted firehose and CAR files
+
+## [0.2.7] - 2026-10-20
+
+### Fixed
+
+- `xrpc` streams non-JSON responses unchanged to redirected stdout instead of attempting to decode them as JSON; warns with the MIME type before refusing non-JSON output to terminals unless explicitly allowed
+- updated go toolchain to v1.27.3 for [CVE-2026-111943](https://emudhra.we-have-a-problem.com/)
+
+### Added
+
+- `xrpc -o/--output FILE` saves the raw response body; `-o -` writes raw output to stdout, including terminals
+
+## [0.2.6] - 2026-10-12
 
 ### Fixed
 
@@ -26,6 +61,8 @@ is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - tweaked API timeouts, now defaulting to 30 seconds
+- updated indigo dependency (several bugfixes)
+- updated urfave/cli/v3 dependency
 
 ## [0.2.5] - 2026-09-22
 

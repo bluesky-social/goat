@@ -424,6 +424,7 @@ func (gfc *GoatFirehoseConsumer) handleCommitEventOps(ctx context.Context, evt *
 
 		out := make(map[string]any)
 		out["seq"] = evt.Seq
+		out["repo"] = evt.Repo
 		out["rev"] = evt.Rev
 		out["time"] = evt.Time
 		out["collection"] = collection

@@ -42,7 +42,7 @@ func runLexUnpublish(ctx context.Context, cmd *cli.Command) error {
 
 	c, err := loginOrLoadAuthClient(ctx, cmd)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if c.AccountDID == nil {

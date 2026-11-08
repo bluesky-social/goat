@@ -62,6 +62,8 @@ func run(args []string) error {
 		cmdRecord,
 		cmdSyntax,
 		cmdKey,
+		cmdCar,
+		cmdStar,
 		cmdPDS,
 		cmdRelay,
 	}

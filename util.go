@@ -74,7 +74,11 @@ func resolveToDID(ctx context.Context, cmd *cli.Command, s string) (syntax.DID, 
 	}
 	hdl, _ := atid.AsHandle()
 	bdir := configBaseDirectory(cmd.String("plc-host"))
-	return bdir.ResolveHandle(ctx, hdl)
+	ident, err := bdir.LookupHandle(ctx, hdl)
+	if err != nil {
+		return "", err
+	}
+	return ident.DID, nil
 }
 
 const stdIOPath = "-"
