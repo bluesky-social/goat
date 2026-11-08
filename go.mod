@@ -6,7 +6,7 @@ toolchain go1.27.1
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/bluesky-social/indigo v0.0.0-20260923021207-6bbf05369ebc
+	github.com/bluesky-social/indigo v0.0.0-20261107011730-fc6469fc67c6
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
@@ -15,10 +15,10 @@ require (
 	github.com/ipfs/go-ipld-format v0.6.3
 	github.com/joho/godotenv v1.5.1
 	github.com/multiformats/go-multihash v0.2.3
-	github.com/urfave/cli/v3 v3.9.0
+	github.com/urfave/cli/v3 v3.14.0
 	github.com/xlab/treeprint v1.2.0
 	github.com/yudai/gojsondiff v1.0.0
-	golang.org/x/term v0.45.0
+	golang.org/x/term v0.46.0
 	tangled.org/bnewbold.net/cobalt v0.0.0-20251130012119-37226a9573e6
 )
 
@@ -38,6 +38,8 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/hyphacoop/cbor/v2 v2.0.0-20251007204234-2a4fa83e606e // indirect
+	github.com/hyphacoop/go-dasl v0.8.0 // indirect
 	github.com/ipfs/bbloom v0.1.0 // indirect
 	github.com/ipfs/boxo v0.40.0 // indirect
 	github.com/ipfs/go-block-format v0.2.3 // indirect
@@ -76,6 +78,7 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	gitlab.com/yawning/secp256k1-voi v0.0.0-20230925100816-f2616030848b // indirect
 	gitlab.com/yawning/tuplehash v0.0.0-20230713102510-df83abbf9a02 // indirect
@@ -88,13 +91,13 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/time v0.15.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/time v0.16.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
-	gorm.io/gorm v1.31.1 // indirect
+	gorm.io/gorm v1.31.2 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
