@@ -118,7 +118,7 @@ func runSpaceRecordGet(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return fmt.Errorf("establishing space session: %w", err)
 		}
-		record, _, err = sc.GetSpaceRecord(ctx, user, suri.Collection(), suri.RecordKey())
+		record, _, err = sc.GetSpaceRecord(ctx, suri.Repo(), suri.Collection(), suri.RecordKey())
 		if err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return fmt.Errorf("establishing space session: %w", err)
 		}
-		c, err = sc.RepoClient(ctx, repo)
+		c, _, err = sc.RepoClient(ctx, repo)
 		if err != nil {
 			return fmt.Errorf("establishing space repo client: %w", err)
 		}

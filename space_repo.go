@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,8 +13,6 @@ import (
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
 	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
-	// TODO: will end up in indigo
-	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
 
 	"github.com/urfave/cli/v3"
 )
@@ -89,23 +87,23 @@ func runSpaceRepoExport(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("establishing space session: %w", err)
 	}
 
-	carPath := cmd.String("output")
-	if carPath == "" {
+	starPath := cmd.String("output")
+	if starPath == "" {
 		// NOTE: having the rev in the the path might be nice
 		now := time.Now().Format("20060102150405")
 		// XXX: somehow encode the space-ref in the filename?
-		carPath = fmt.Sprintf("%s.%s.space.car", username, now)
+		starPath = fmt.Sprintf("%s.%s.space.star", username, now)
 	}
-	output, err := getFileOrStdout(carPath)
+	output, err := getFileOrStdout(starPath)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
-			return fmt.Errorf("file already exists: %s", carPath)
+			return fmt.Errorf("file already exists: %s", starPath)
 		}
 		return err
 	}
 	defer output.Close()
-	if carPath != stdIOPath {
-		fmt.Printf("downloading to: %s\n", carPath)
+	if starPath != stdIOPath {
+		fmt.Printf("downloading to: %s\n", starPath)
 	}
 	body, err := sc.GetSpaceRepoBytes(ctx, ident.DID)
 	if err != nil {
@@ -149,7 +147,6 @@ func runSpaceRepoLatest(ctx context.Context, cmd *cli.Command) error {
 
 	commit, err := sc.GetLatestSpaceCommit(ctx, ident.DID)
 	if err != nil {
-		// TODO: clean up file if error?
 		return err
 	}
 
@@ -182,9 +179,10 @@ func runSpaceRepoOplog(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	since := cmd.String("since")
-	if since != "" {
-		_, err := syntax.ParseTID(since)
+	var since syntax.TID
+	rawsince := cmd.String("since")
+	if rawsince != "" {
+		since, err = syntax.ParseTID(rawsince)
 		if err != nil {
 			return fmt.Errorf("invalid 'since' revision: %w", err)
 		}
@@ -200,34 +198,32 @@ func runSpaceRepoOplog(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("establishing space session: %w", err)
 	}
-	rc, err := sc.RepoClient(ctx, ident.DID)
-	if err != nil {
-		return fmt.Errorf("establishing space repo connection: %w", err)
-	}
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, excludeValues *bool, limit *int64, repo string, since string, space string
-		resp, err := spaceapi.SpaceListRepoOps(ctx, rc, cursor, new(true), new(int64(100)), ident.DID.String(), since, space.String())
+
+		_, entries, next, err := sc.ListSpaceRepoOps(ctx, ident.DID, since, cursor)
 		if err != nil {
 			return err
 		}
-		for _, op := range resp.Ops {
-			fmt.Printf("%s\t%s/%s\t%v\t%v\n", op.Rev, op.Collection, op.Rkey, ptrVal(op.Prev), ptrVal(op.Cid))
+
+		for _, op := range entries {
+
+			c := "nil"
+			if op.CID != nil {
+				c = op.CID.String()
+			}
+			prev := "nil"
+			if op.Prev != nil {
+				prev = op.Prev.String()
+			}
+			fmt.Printf("%s\t%s/%s\t%v\t%v\n", op.Revision, op.Collection, op.RecordKey, prev, c)
 		}
-		if resp.Cursor != nil && *resp.Cursor != "" {
-			cursor = *resp.Cursor
-		} else {
+		if next == "" {
 			break
 		}
+		cursor = next
 	}
 
 	return nil
-}
-
-func ptrVal(s *string) string {
-	if s == nil {
-		return "nil"
-	}
-	return *s
 }
