@@ -54,6 +54,13 @@ var cmdSpaceRepo = &cli.Command{
 			},
 			Action: runSpaceRepoOplog,
 		},
+		&cli.Command{
+			Name:      "verify",
+			Usage:     "check integrity (but not authenticity) of space repo STAR file",
+			ArgsUsage: `<star-file>`,
+			Flags:     []cli.Flag{},
+			Action:    runSpaceRepoVerify,
+		},
 	},
 }
 
@@ -225,5 +232,24 @@ func runSpaceRepoOplog(ctx context.Context, cmd *cli.Command) error {
 		cursor = next
 	}
 
+	return nil
+}
+
+func runSpaceRepoVerify(ctx context.Context, cmd *cli.Command) error {
+	starPath := cmd.Args().First()
+	if starPath == "" {
+		return fmt.Errorf("need to provide path to STAR file as argument")
+	}
+	fi, err := os.Open(starPath)
+	if err != nil {
+		return fmt.Errorf("failed to open STAR file: %w", err)
+	}
+	defer fi.Close()
+
+	if err := atspace.VerifyRepo(atspace.NewRepoReader(fi)); err != nil {
+		return err
+	}
+
+	fmt.Println("valid")
 	return nil
 }
