@@ -36,13 +36,13 @@ func runSpaceSimpleList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, did string, limit *int64, spaceType string
-		resp, err := spaceapi.SpaceListSpaces(ctx, client, cursor, "", new(int64(100)), "")
+		// ctx, c, cursor string, limit *int64, spaceDid string, spaceType string
+		resp, err := spaceapi.SpaceListSpaces(ctx, client, cursor, new(int64(100)), "", "")
 		if err != nil {
 			return err
 		}
 		for _, sp := range resp.Spaces {
-			fmt.Println(sp.Uri)
+			fmt.Println(sp.Space)
 		}
 		if resp.Cursor != nil && *resp.Cursor != "" {
 			cursor = *resp.Cursor

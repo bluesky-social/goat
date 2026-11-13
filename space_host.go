@@ -49,12 +49,18 @@ func runSpaceHostListRepos(ctx context.Context, cmd *cli.Command) error {
 	cursor := ""
 	for {
 		// ctx, c, cursor string, limit *int64, space string
-		resp, err := spaceapi.SpaceListRepos(ctx, sc.SpaceHostClient, cursor, new(int64(100)), space.String())
+		resp, err := spaceapi.SpaceListWriters(ctx, sc.SpaceHostClient, cursor, new(int64(100)), space.String())
 		if err != nil {
 			return err
 		}
-		for _, repo := range resp.Repos {
-			fmt.Printf("%s\t%s\t%s\t%x\n", repo.Did, repo.SpaceRev, repo.RepoRev, repo.Data)
+		for _, entry := range resp.Repos {
+			if entry.SpaceDefs_RepoRemoved != nil {
+				repo := entry.SpaceDefs_RepoRemoved
+				fmt.Printf("%s\t%s\t-\t-\n", repo.Repo, repo.SpaceRev)
+			} else if entry.SpaceDefs_RepoWrite != nil {
+				repo := entry.SpaceDefs_RepoWrite
+				fmt.Printf("%s\t%s\t%s\t%x\n", repo.Repo, repo.SpaceRev, repo.RepoRev, repo.Data)
+			}
 		}
 		if resp.Cursor != nil && *resp.Cursor != "" {
 			cursor = *resp.Cursor

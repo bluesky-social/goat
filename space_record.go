@@ -183,8 +183,8 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, client, collection string, cursor string, excludeValues *bool, limit *int64, repo string, reverse *bool, space string
-		resp, err := spaceapi.SpaceListRecords(ctx, c, collection, cursor, new(false), new(int64(100)), repo.String(), nil, space.String())
+		// ctx, client, collection string, cursor string, excludeValues *bool, limit *int64, repo string, space string
+		resp, err := spaceapi.SpaceListRecords(ctx, c, collection, cursor, new(false), new(int64(100)), repo.String(), space.String())
 		if err != nil {
 			return err
 		}
