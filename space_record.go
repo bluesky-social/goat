@@ -137,7 +137,7 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 	dir := configDirectory(cmd.String("plc-host"))
 
 	if cmd.Args().Len() != 2 {
-		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+		return fmt.Errorf("need to provide space-ref as argument")
 	}
 	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
@@ -203,7 +203,7 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
-		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+		return fmt.Errorf("need to provide space-ref as argument")
 	}
 	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
@@ -272,7 +272,7 @@ func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
-		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+		return fmt.Errorf("need to provide space-ref as argument")
 	}
 	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
@@ -333,7 +333,7 @@ func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceRecordDelete(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 3 {
-		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
+		return fmt.Errorf("need to provide space-ref as argument")
 	}
 	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
