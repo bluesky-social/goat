@@ -111,6 +111,30 @@ var cmdSyntax = &cli.Command{
 			},
 		},
 		&cli.Command{
+			Name:  "space-uri",
+			Usage: "commands for atproto space URI syntax",
+			Commands: []*cli.Command{
+				&cli.Command{
+					Name:      "check",
+					Usage:     "validates space URI syntax",
+					ArgsUsage: `<uri>`,
+					Action:    runSyntaxSpaceURICheck,
+				},
+			},
+		},
+		&cli.Command{
+			Name:  "space-ref",
+			Usage: "commands for atproto space-ref syntax",
+			Commands: []*cli.Command{
+				&cli.Command{
+					Name:      "check",
+					Usage:     "validates space-ref syntax",
+					ArgsUsage: `<space-ref>`,
+					Action:    runSyntaxSpaceRefCheck,
+				},
+			},
+		},
+		&cli.Command{
 			Name:  "datetime",
 			Usage: "commands for datetimes",
 			Commands: []*cli.Command{
@@ -247,6 +271,32 @@ func runSyntaxATURICheck(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("need to provide identifier as argument")
 	}
 	_, err := syntax.ParseATURI(s)
+	if err != nil {
+		return err
+	}
+	fmt.Println("valid")
+	return nil
+}
+
+func runSyntaxSpaceURICheck(ctx context.Context, cmd *cli.Command) error {
+	s := cmd.Args().First()
+	if s == "" {
+		return fmt.Errorf("need to provide identifier as argument")
+	}
+	_, err := syntax.ParseSpaceURI(s)
+	if err != nil {
+		return err
+	}
+	fmt.Println("valid")
+	return nil
+}
+
+func runSyntaxSpaceRefCheck(ctx context.Context, cmd *cli.Command) error {
+	s := cmd.Args().First()
+	if s == "" {
+		return fmt.Errorf("need to provide identifier as argument")
+	}
+	_, err := syntax.ParseSpaceRef(s)
 	if err != nil {
 		return err
 	}
