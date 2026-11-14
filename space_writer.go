@@ -12,22 +12,22 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var cmdSpaceHost = &cli.Command{
-	Name:  "host",
-	Usage: "commands for space hosts",
+var cmdSpaceWriter = &cli.Command{
+	Name:  "writer",
+	Usage: "commands for space writer set",
 	Flags: []cli.Flag{},
 	Commands: []*cli.Command{
 		&cli.Command{
-			Name:      "list-repos",
+			Name:      "list",
 			Usage:     "list all space repos for given space",
 			ArgsUsage: `<space>`,
 			Flags:     []cli.Flag{},
-			Action:    runSpaceHostListRepos,
+			Action:    runSpaceWriterList,
 		},
 	},
 }
 
-func runSpaceHostListRepos(ctx context.Context, cmd *cli.Command) error {
+func runSpaceWriterList(ctx context.Context, cmd *cli.Command) error {
 	dir := configDirectory(cmd.String("plc-host"))
 
 	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
