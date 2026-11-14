@@ -12,6 +12,6 @@ var cmdSpace = &cli.Command{
 		cmdSpaceRepo,
 		cmdSpaceBlob,
 		cmdSpaceWriter,
-		cmdSpaceSimple,
+		cmdSpaceManage,
 	},
 }

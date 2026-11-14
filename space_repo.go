@@ -12,6 +12,7 @@ import (
 
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
+	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
 	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
@@ -22,6 +23,11 @@ var cmdSpaceRepo = &cli.Command{
 	Usage: "commands for space repos",
 	Flags: []cli.Flag{},
 	Commands: []*cli.Command{
+		&cli.Command{
+			Name:   "list",
+			Usage:  "list all space repos for the current account",
+			Action: runSpaceRepoList,
+		},
 		&cli.Command{
 			Name:      "export",
 			Usage:     "download space repo STAR file",
@@ -62,6 +68,35 @@ var cmdSpaceRepo = &cli.Command{
 			Action:    runSpaceRepoVerify,
 		},
 	},
+}
+
+func runSpaceRepoList(ctx context.Context, cmd *cli.Command) error {
+
+	client, err := loadAuthClient(ctx, cmd)
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("PDS auth required, but not logged in")
+	} else if err != nil {
+		return err
+	}
+
+	cursor := ""
+	for {
+		// ctx, c, cursor string, limit *int64, spaceDid string, spaceType string
+		resp, err := spaceapi.SpaceListSpaces(ctx, client, cursor, new(int64(100)), "", "")
+		if err != nil {
+			return err
+		}
+		for _, entry := range resp.Spaces {
+			fmt.Println(entry.Space)
+		}
+		if resp.Cursor != nil && *resp.Cursor != "" {
+			cursor = *resp.Cursor
+		} else {
+			break
+		}
+	}
+
+	return nil
 }
 
 func runSpaceRepoExport(ctx context.Context, cmd *cli.Command) error {

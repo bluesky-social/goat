@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"tangled.org/bnewbold.net/cobalt/atspace"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"tangled.org/bnewbold.net/cobalt/atspace"
 	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
