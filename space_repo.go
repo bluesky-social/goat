@@ -42,6 +42,17 @@ var cmdSpaceRepo = &cli.Command{
 			Action: runSpaceRepoExport,
 		},
 		&cli.Command{
+			Name:  "import",
+			Usage: "upload space repo STAR file (eg, for migration)",
+			Arguments: []cli.Argument{
+				&cli.StringArg{
+					Name:     "path",
+					Required: true,
+				},
+			},
+			Action: runSpaceRepoImport,
+		},
+		&cli.Command{
 			Name:      "latest",
 			Usage:     "print commit metadata for space repo",
 			ArgsUsage: `<space> <repo>`,
@@ -155,6 +166,34 @@ func runSpaceRepoExport(ctx context.Context, cmd *cli.Command) error {
 	_, err = io.Copy(output, bytes.NewBuffer(body))
 	// TODO: clean up file if error?
 	return err
+}
+
+func runSpaceRepoImport(ctx context.Context, cmd *cli.Command) error {
+
+	starPath := cmd.StringArg("path")
+
+	client, err := loadAuthClient(ctx, cmd)
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("auth required, but not logged in")
+	} else if err != nil {
+		return err
+	}
+
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
+
+	// TODO: could stream instead of reading full file
+	fileBytes, err := os.ReadFile(starPath)
+	if err != nil {
+		return err
+	}
+
+	err = spaceapi.SpaceImportRepo(ctx, client, bytes.NewReader(fileBytes))
+	if err != nil {
+		return fmt.Errorf("failed to import repo: %w", err)
+	}
+
+	return nil
 }
 
 func runSpaceRepoLatest(ctx context.Context, cmd *cli.Command) error {

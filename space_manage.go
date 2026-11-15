@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
+	"time"
 
 	// TODO: will end up in indigo
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -49,6 +53,35 @@ var cmdSpaceManage = &cli.Command{
 			Action: runSpaceManageDelete,
 		},
 		cmdSpaceManageMember,
+		&cli.Command{
+			Name: "export",
+			Arguments: []cli.Argument{
+				&cli.StringArg{
+					Name:     "space",
+					Required: true,
+				},
+			},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "output",
+					Aliases: []string{"o"},
+					Usage:   "file path for STAR download",
+				},
+			},
+			Usage:  "export space meta STAR file (not space repo)",
+			Action: runSpaceManageExport,
+		},
+		&cli.Command{
+			Name:  "import",
+			Usage: "upload space meta STAR file (eg, for migration)",
+			Arguments: []cli.Argument{
+				&cli.StringArg{
+					Name:     "path",
+					Required: true,
+				},
+			},
+			Action: runSpaceManageImport,
+		},
 	},
 }
 
@@ -381,5 +414,75 @@ func runSpaceManageMemberRemove(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	fmt.Println("success")
+	return nil
+}
+
+func runSpaceManageExport(ctx context.Context, cmd *cli.Command) error {
+
+	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	if err != nil {
+		return err
+	}
+
+	client, err := loadAuthClient(ctx, cmd)
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("PDS auth required, but not logged in")
+	} else if err != nil {
+		return err
+	}
+
+	starPath := cmd.String("output")
+	if starPath == "" {
+		// NOTE: having the rev in the the path might be nice
+		now := time.Now().Format("20060102150405")
+		starPath = fmt.Sprintf("%s_%s.%s.meta.star", space.SpaceType(), space.SpaceKey(), now)
+	}
+	output, err := getFileOrStdout(starPath)
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return fmt.Errorf("file already exists: %s", starPath)
+		}
+		return err
+	}
+	defer output.Close()
+	if starPath != stdIOPath {
+		fmt.Printf("downloading from %s to: %s\n", client.Host, starPath)
+	}
+
+	metaBytes, err := spaceapi.SpaceExportSpaceMeta(ctx, client, space.String())
+	if err != nil {
+		return err
+	}
+	if _, err := output.Write(metaBytes); err != nil {
+		return err
+	}
+	return nil
+}
+
+func runSpaceManageImport(ctx context.Context, cmd *cli.Command) error {
+
+	starPath := cmd.StringArg("path")
+
+	client, err := loadAuthClient(ctx, cmd)
+	if err == ErrNoAuthSession {
+		return fmt.Errorf("auth required, but not logged in")
+	} else if err != nil {
+		return err
+	}
+
+	// longer timeout for big uploads
+	client.Client.Timeout = 300 * time.Second
+
+	// TODO: could stream instead of reading full file
+	fileBytes, err := os.ReadFile(starPath)
+	if err != nil {
+		return err
+	}
+
+	err = spaceapi.SpaceImportSpaceMeta(ctx, client, bytes.NewReader(fileBytes))
+	if err != nil {
+		return fmt.Errorf("failed to import space meta: %w", err)
+	}
+
 	return nil
 }
