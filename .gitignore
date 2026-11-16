@@ -22,6 +22,8 @@ test-coverage.out
 dist/
 scratch/
 lexicons/
+*.star
+*.car
 
 # executables
 /goat
