@@ -174,8 +174,14 @@ var cmdPDSAdmin = &cli.Command{
 func NewPDSAdminClient(cmd *cli.Command) (*atclient.APIClient, error) {
 	adminPass := cmd.String("admin-password")
 	if adminPass == "" {
-		// try reading from PDS env file (if we are on PDS host or docker container)
-		b, err := os.ReadFile("/pds/pds.env")
+		// try reading from PDS env file (if we are on PDS host or docker container).
+		// PDS_ENV_FILE allows overriding the default /pds/pds.env path, useful for
+		// multi-tenant hosts or non-default install layouts.
+		envPath := os.Getenv("PDS_ENV_FILE")
+		if envPath == "" {
+			envPath = "/pds/pds.env"
+		}
+		b, err := os.ReadFile(envPath)
 		if err == nil {
 			scanner := bufio.NewScanner(strings.NewReader(string(b)))
 			for scanner.Scan() {
