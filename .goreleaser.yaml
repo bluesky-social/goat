@@ -16,6 +16,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -s -w -X main.Version={{ .Version }}
 
 nfpms:
   - id: default
