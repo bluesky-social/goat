@@ -6,7 +6,7 @@ toolchain go1.27.3
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/bluesky-social/indigo v0.0.0-20261103210605-a41b056300f5
+	github.com/bluesky-social/indigo v0.0.0-20261125030134-6017e7ee0a79
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
