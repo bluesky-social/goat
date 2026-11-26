@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	// TODO: will end up in indigo
+	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
-	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -30,7 +29,7 @@ var cmdSpaceWriter = &cli.Command{
 func runSpaceWriterList(ctx context.Context, cmd *cli.Command) error {
 	dir := configDirectory(cmd.String("plc-host"))
 
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -48,8 +47,8 @@ func runSpaceWriterList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, limit *int64, space string
-		resp, err := spaceapi.SpaceListWriters(ctx, sc.SpaceHostClient, cursor, new(int64(100)), space.String())
+		// ctx, c, cursor string, limit int64, space string
+		resp, err := comatproto.SpaceListWriters(ctx, sc.SpaceHostClient, cursor, int64(100), space.String())
 		if err != nil {
 			return err
 		}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -284,7 +283,7 @@ func runSyntaxSpaceURICheck(ctx context.Context, cmd *cli.Command) error {
 	if s == "" {
 		return fmt.Errorf("need to provide identifier as argument")
 	}
-	_, err := xsyntax.ParseSpaceURI(s)
+	_, err := syntax.ParseSpaceURI(s)
 	if err != nil {
 		return err
 	}
@@ -297,7 +296,7 @@ func runSyntaxSpaceRefCheck(ctx context.Context, cmd *cli.Command) error {
 	if s == "" {
 		return fmt.Errorf("need to provide identifier as argument")
 	}
-	_, err := xsyntax.ParseSpaceRef(s)
+	_, err := syntax.ParseSpaceRef(s)
 	if err != nil {
 		return err
 	}

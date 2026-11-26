@@ -10,10 +10,9 @@ import (
 	"os"
 	"time"
 
+	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
-	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -92,8 +91,8 @@ func runSpaceRepoList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, limit *int64, spaceDid string, spaceType string
-		resp, err := spaceapi.SpaceListSpaces(ctx, client, cursor, new(int64(100)), "", "")
+		// ctx, c, cursor string, limit int64, spaceDid string, spaceType string
+		resp, err := comatproto.SpaceListSpaces(ctx, client, cursor, int64(100), "", "")
 		if err != nil {
 			return err
 		}
@@ -116,7 +115,7 @@ func runSpaceRepoExport(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -188,7 +187,7 @@ func runSpaceRepoImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = spaceapi.SpaceImportRepo(ctx, client, bytes.NewReader(fileBytes))
+	err = comatproto.SpaceImportRepo(ctx, client, bytes.NewReader(fileBytes))
 	if err != nil {
 		return fmt.Errorf("failed to import repo: %w", err)
 	}
@@ -202,7 +201,7 @@ func runSpaceRepoLatest(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -247,7 +246,7 @@ func runSpaceRepoOplog(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref and repo-ident as arguments")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}

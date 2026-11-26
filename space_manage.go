@@ -10,9 +10,8 @@ import (
 	"time"
 
 	// TODO: will end up in indigo
+	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/syntax"
-	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -165,8 +164,8 @@ func runSpaceManageList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, limit *int64, spaceDid string, spaceType string
-		resp, err := spaceapi.SpaceListSpaces(ctx, client, cursor, new(int64(100)), client.AccountDID.String(), "")
+		// ctx, c, cursor string, limit int64, spaceDid string, spaceType string
+		resp, err := comatproto.SpaceListSpaces(ctx, client, cursor, int64(100), client.AccountDID.String(), "")
 		if err != nil {
 			return err
 		}
@@ -185,7 +184,7 @@ func runSpaceManageList(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManagePolicy(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -197,7 +196,7 @@ func runSpaceManagePolicy(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	resp, err := spaceapi.SpaceGetSpace(ctx, client, space.String())
+	resp, err := comatproto.SpaceGetSpace(ctx, client, space.String())
 	if err != nil {
 		return err
 	}
@@ -213,7 +212,7 @@ func runSpaceManagePolicy(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManageDelete(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -225,7 +224,7 @@ func runSpaceManageDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = spaceapi.SpaceDeleteSpace(ctx, client, &spaceapi.SpaceDeleteSpace_Input{
+	err = comatproto.SpaceDeleteSpace(ctx, client, &comatproto.SpaceDeleteSpace_Input{
 		Space: space.String(),
 	})
 	if err != nil {
@@ -258,11 +257,11 @@ func runSpaceManageCreatePersonal(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	_, err = spaceapi.SpaceCreateSpace(ctx, client, &spaceapi.SpaceCreateSpace_Input{
+	_, err = comatproto.SpaceCreateSpace(ctx, client, &comatproto.SpaceCreateSpace_Input{
 		SpaceType: spaceType.String(),
 		Skey:      skeyArg,
-		Policy: spaceapi.SpaceCreateSpace_Input_Policy{
-			PersonalspacePolicy: &spaceapi.PersonalspacePolicy{},
+		Policy: &comatproto.SpaceCreateSpace_Input_Policy{
+			PersonalspacePolicy: &comatproto.PersonalspacePolicy{},
 		},
 	})
 	if err != nil {
@@ -295,11 +294,11 @@ func runSpaceManageCreateMember(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	_, err = spaceapi.SpaceCreateSpace(ctx, client, &spaceapi.SpaceCreateSpace_Input{
+	_, err = comatproto.SpaceCreateSpace(ctx, client, &comatproto.SpaceCreateSpace_Input{
 		SpaceType: spaceType.String(),
 		Skey:      skeyArg,
-		Policy: spaceapi.SpaceCreateSpace_Input_Policy{
-			MemberspacePolicy: &spaceapi.MemberspacePolicy{
+		Policy: &comatproto.SpaceCreateSpace_Input_Policy{
+			MemberspacePolicy: &comatproto.MemberspacePolicy{
 				// TODO: AllowedApps
 				PublicRead:     new(cmd.Bool("public-read")),
 				PublicWrite:    new(cmd.Bool("public-write")),
@@ -318,7 +317,7 @@ func runSpaceManageCreateMember(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManageMemberList(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -332,8 +331,8 @@ func runSpaceManageMemberList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, c, cursor string, limit *int64, space string
-		resp, err := spaceapi.MemberspaceListMembers(ctx, client, cursor, new(int64(100)), space.String())
+		// ctx, c, cursor string, limit int64, space string
+		resp, err := comatproto.MemberspaceListMembers(ctx, client, cursor, int64(100), space.String())
 		if err != nil {
 			return err
 		}
@@ -352,7 +351,7 @@ func runSpaceManageMemberList(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManageMemberAdd(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -368,10 +367,10 @@ func runSpaceManageMemberAdd(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = spaceapi.MemberspacePutMembers(ctx, client, &spaceapi.MemberspacePutMembers_Input{
+	err = comatproto.MemberspacePutMembers(ctx, client, &comatproto.MemberspacePutMembers_Input{
 		Space: space.String(),
-		Members: []spaceapi.MemberspaceDefs_Member{
-			spaceapi.MemberspaceDefs_Member{
+		Members: []*comatproto.MemberspaceDefs_Member{
+			&comatproto.MemberspaceDefs_Member{
 				Did: did.String(),
 				// TODO: configurable
 				Read:  true,
@@ -389,7 +388,7 @@ func runSpaceManageMemberAdd(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManageMemberRemove(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -405,7 +404,7 @@ func runSpaceManageMemberRemove(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = spaceapi.MemberspaceRemoveMembers(ctx, client, &spaceapi.MemberspaceRemoveMembers_Input{
+	err = comatproto.MemberspaceRemoveMembers(ctx, client, &comatproto.MemberspaceRemoveMembers_Input{
 		Space: space.String(),
 		Dids:  []string{did.String()},
 	})
@@ -419,7 +418,7 @@ func runSpaceManageMemberRemove(ctx context.Context, cmd *cli.Command) error {
 
 func runSpaceManageExport(ctx context.Context, cmd *cli.Command) error {
 
-	space, err := xsyntax.ParseSpaceRef(cmd.StringArg("space"))
+	space, err := syntax.ParseSpaceRef(cmd.StringArg("space"))
 	if err != nil {
 		return err
 	}
@@ -449,7 +448,7 @@ func runSpaceManageExport(ctx context.Context, cmd *cli.Command) error {
 		fmt.Printf("downloading from %s to: %s\n", client.Host, starPath)
 	}
 
-	metaBytes, err := spaceapi.SpaceExportSpaceMeta(ctx, client, space.String())
+	metaBytes, err := comatproto.SpaceExportSpaceMeta(ctx, client, space.String())
 	if err != nil {
 		return err
 	}
@@ -479,7 +478,7 @@ func runSpaceManageImport(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = spaceapi.SpaceImportSpaceMeta(ctx, client, bytes.NewReader(fileBytes))
+	err = comatproto.SpaceImportSpaceMeta(ctx, client, bytes.NewReader(fileBytes))
 	if err != nil {
 		return fmt.Errorf("failed to import space meta: %w", err)
 	}

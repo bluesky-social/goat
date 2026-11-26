@@ -7,7 +7,6 @@ import (
 
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 
 	"github.com/urfave/cli/v3"
 )
@@ -45,7 +44,7 @@ func runSpaceBlobDownload(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() < 3 {
 		return fmt.Errorf("need to provide space, repo, and blob CID arguments")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().Get(1))
+	space, err := syntax.ParseSpaceRef(cmd.Args().Get(1))
 	if err != nil {
 		return err
 	}

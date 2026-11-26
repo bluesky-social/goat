@@ -7,15 +7,12 @@ import (
 	"io"
 	"os"
 
+	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"tangled.org/bnewbold.net/cobalt/atspace"
-	"tangled.org/bnewbold.net/cobalt/atspace/xsyntax"
 	"tangled.org/bnewbold.net/cobalt/pdsclient"
-
-	// TODO: will end up in indigo
-	spaceapi "tangled.org/bnewbold.net/cobalt/atspace/comatproto"
 
 	"github.com/urfave/cli/v3"
 )
@@ -90,7 +87,7 @@ func runSpaceRecordGet(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("expected a single space URI argument")
 	}
 
-	suri, err := xsyntax.ParseSpaceURI(uriArg)
+	suri, err := syntax.ParseSpaceURI(uriArg)
 	if err != nil {
 		return fmt.Errorf("not a valid space URI: %v", err)
 	}
@@ -139,7 +136,7 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref as argument")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -183,8 +180,8 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 
 	cursor := ""
 	for {
-		// ctx, client, collection string, cursor string, excludeValues *bool, limit *int64, repo string, space string
-		resp, err := spaceapi.SpaceListRecords(ctx, c, collection, cursor, new(false), new(int64(100)), repo.String(), space.String())
+		// ctx, client, collection string, cursor string, excludeValues bool, limit int64, repo string, space string
+		resp, err := comatproto.SpaceListRecords(ctx, c, collection, cursor, false, int64(100), repo.String(), space.String())
 		if err != nil {
 			return err
 		}
@@ -205,7 +202,7 @@ func runSpaceRecordCreate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref as argument")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -274,7 +271,7 @@ func runSpaceRecordUpdate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 2 {
 		return fmt.Errorf("need to provide space-ref as argument")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -335,7 +332,7 @@ func runSpaceRecordDelete(ctx context.Context, cmd *cli.Command) error {
 	if cmd.Args().Len() != 3 {
 		return fmt.Errorf("need to provide space-ref as argument")
 	}
-	space, err := xsyntax.ParseSpaceRef(cmd.Args().First())
+	space, err := syntax.ParseSpaceRef(cmd.Args().First())
 	if err != nil {
 		return err
 	}
