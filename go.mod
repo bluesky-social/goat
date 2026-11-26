@@ -6,7 +6,7 @@ toolchain go1.27.3
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/bluesky-social/indigo v0.0.0-20261126025946-36c074670cbd
+	github.com/bluesky-social/indigo v0.0.0-20261126035822-0cd86484540e
 	github.com/did-method-plc/go-didplc v0.0.0-20251009212921-7b7a252b8019
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/gorilla/websocket v1.5.3
@@ -21,7 +21,7 @@ require (
 	github.com/xlab/treeprint v1.2.0
 	github.com/yudai/gojsondiff v1.0.0
 	golang.org/x/term v0.46.0
-	tangled.org/bnewbold.net/cobalt v0.0.0-20261106024146-a0b7ece6af10
+	tangled.org/bnewbold.net/cobalt v0.0.0-20261126040000-267298e1ec4e
 )
 
 require (
@@ -103,5 +103,3 @@ require (
 	gorm.io/gorm v1.31.2 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
-
-replace tangled.org/bnewbold.net/cobalt => ../cobalt
