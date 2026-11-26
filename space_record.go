@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	comatproto "github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/atclient"
 	"github.com/bluesky-social/indigo/atproto/atdata"
 	"github.com/bluesky-social/indigo/atproto/syntax"
@@ -181,7 +181,7 @@ func runSpaceRecordList(ctx context.Context, cmd *cli.Command) error {
 	cursor := ""
 	for {
 		// ctx, client, collection string, cursor string, excludeValues bool, limit int64, repo string, space string
-		resp, err := comatproto.SpaceListRecords(ctx, c, collection, cursor, false, int64(100), repo.String(), space.String())
+		resp, err := agnostic.SpaceListRecords(ctx, c, collection, cursor, false, int64(100), repo.String(), space.String())
 		if err != nil {
 			return err
 		}
